@@ -1,9 +1,9 @@
 {
-  "name": "service-example",
-  "vendor": "vtex",
+  "name": "massive-score-update",
+  "vendor": "vtexarg",
   "version": "0.2.0",
-  "title": "Service Example",
-  "description": "Reference app for VTEX IO Services",
+  "title": "Massive score update",
+  "description": "Massive update of score.",
   "mustUpdateAt": "2018-01-04",
   "categories": [],
   "dependencies": {},
@@ -11,11 +11,46 @@
     "node": "6.x",
     "docs": "0.x"
   },
+  "billingOptions": {
+    "support": {
+      "url": "https://support.vtex.com/hc/requests"
+    },
+    "type": "free",
+    "availableCountries": ["*"]
+  },
   "scripts": {
     "prereleasy": "bash lint.sh"
   },
   "credentialType": "absolute",
   "policies": [
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.myvtex.com",
+        "path": "/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "portal.vtexcommercestable.com.br",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "portal.vtexcommercebeta.com.br",
+        "path": "/api/*"
+      }
+    },
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/*"
+      }
+    },
     {
       "name": "outbound-access",
       "attrs": {
@@ -28,6 +63,12 @@
     },
     {
       "name": "colossus-write-logs"
+    },
+    {
+      "name": "ManterFormularioProdutoSku"
+    },
+    {
+      "name": "ProdutoForm.aspx"
     }
   ],
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
