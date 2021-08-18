@@ -1,7 +1,7 @@
 {
   "name": "massive-score-update",
   "vendor": "vtexarg",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "Massive score update",
   "description": "Massive update of score.",
   "mustUpdateAt": "2018-01-04",
