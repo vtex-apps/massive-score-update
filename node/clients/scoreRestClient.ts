@@ -1,11 +1,9 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 import { ExternalClient } from '@vtex/api'
 
-import type { Body } from '../middlewares/scoreMiddleware'
-
 export default class ScoreRestClient extends ExternalClient {
   constructor(context: IOContext, options?: InstanceOptions) {
-    super(`http://${context.account}.vtexcommercestable.com.br`, context, {
+    super(`https://${context.account}.vtexcommercestable.com.br`, context, {
       ...options,
       headers: {
         VtexIdClientAutCookie:
@@ -19,17 +17,39 @@ export default class ScoreRestClient extends ExternalClient {
     })
   }
 
-  public async updateProductScore(
-    body: Body,
+  public async productScoreUpdate(
+    body: UpdateRequest,
     productId: number | string
-  ): Promise<UpdateProductScoreResponse> {
-    return this.http.put(`/api/catalog/pvt/product/${productId}`, body)
+  ): Promise<UpdateResponseProductScore> {
+    return this.http.put(`/api/catalog/pvt/product/${productId}`, {
+      name: body.name,
+      categoryId: body.categoryId,
+      brandId: body.brandId,
+      score: body.score,
+    })
+  }
+
+  public async catalogScoreUpdate(
+    body: UpdateRequest,
+    catalogId: number | string
+  ): Promise<UpdateResponseCatalogScore> {
+    return this.http.put(`/api/catalog/pvt/category/${catalogId}`, {
+      name: body.name,
+      score: body.score,
+    })
   }
 }
 
-export interface UpdateProductScoreResponse {
+export interface UpdateResponseProductScore {
   Id: number
   Name: string
   CategoryId: number
+  BrandId: number
+  Score: number
+}
+
+export interface UpdateResponseCatalogScore {
+  Id: number
+  Name: string
   Score: number
 }

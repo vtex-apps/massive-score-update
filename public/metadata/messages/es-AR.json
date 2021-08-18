@@ -1,0 +1,14 @@
+{
+  "name": "Massive Score Update",
+  "headline": "Actualización masiva del score de los productos y catalogos.",
+  "overview": "Esta aplicación permite actualizar el score de los productos y catálogos por lotes.",
+  "features": [
+    "Reducción de tiempos de integración",
+    "Reducción de gastos generales de las solicitudes",
+    "Simplicidad"
+  ],
+  "websiteURL": "https://vtex.com/",
+  "support": {
+    "url": "https://support.vtex.com/hc/requests"
+  }
+}

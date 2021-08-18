@@ -6,20 +6,77 @@ export async function validateMiddleware(
   next: () => Promise<any>
 ) {
   const body = await json(ctx.req)
-  let allErrorsList: ProductMiddlewareResponse[] = []
+  const errorList: any[] = []
+
+  function fieldValidator(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    fields: UpdateRequest,
+    path: boolean
+  ): void {
+    const elements: UpdateResponse[] = []
+
+    const { id, name, categoryId, brandId, score } = fields
+
+    if (!id) {
+      elements.push({
+        success: 'false',
+        error: 'Request failed with status code 400',
+        errorMessage: `The request is invalid:  The 'id' field is required.`,
+      })
+    }
+
+    if (!name) {
+      elements.push({
+        success: 'false',
+        error: 'Request failed with status code 400',
+        errorMessage: `The request is invalid:  The 'name' field is required.`,
+      })
+    }
+
+    if (!categoryId && path) {
+      elements.push({
+        success: 'false',
+        error: 'Request failed with status code 400',
+        errorMessage: `The request is invalid: The 'categoryId' field is required.`,
+      })
+    }
+
+    if (!brandId && path) {
+      elements.push({
+        success: 'false',
+        error: 'Request failed with status code 400',
+        errorMessage: `The request is invalid: The 'brandId' field is required.`,
+      })
+    }
+
+    if (!score) {
+      elements.push({
+        success: 'false',
+        error: 'Request failed with status code 400',
+        errorMessage: `The request is invalid: The 'score' field is required.`,
+      })
+    }
+
+    if (elements.length >= 1) {
+      errorList.push(elements)
+    }
+  }
 
   try {
-    for (const update of body) {
-      allErrorsList = fieldValidator(update)
+    const endpointIdentifier = ctx.url.includes('product/score')
+
+    for (const product of body) {
+      fieldValidator(product, endpointIdentifier)
     }
   } catch (error) {
+    // eslint-disable-next-line no-console
     throw new UserInputError(error)
   }
 
-  if (allErrorsList.length >= 1) {
+  if (errorList.length >= 1) {
     ctx.status = 400
     ctx.response.body = {
-      message: allErrorsList,
+      errorList,
     }
 
     return
@@ -29,136 +86,3 @@ export async function validateMiddleware(
 
   await next()
 }
-
-function fieldValidator(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fields: any[]
-): ProductMiddlewareResponse[] {
-  // eslint-disable-next-line no-console
-  console.log('fields', fields)
-
-  const errorList: ProductMiddlewareResponse[] = []
-
-  for (const field in fields) {
-    if (typeof fields[field] !== 'undefined' && typeof fields[field] !== null) {
-      if (
-        typeof fields[field] !== 'number' &&
-        typeof fields[field] !== 'string'
-      ) {
-        errorList.push({
-          success: 'false',
-          error: 'Request failed with status code 400',
-          errorMessage: `The request is invalid: field ${field}' must be a number or string`,
-        })
-      } else if (field === 'name' && typeof fields[field] !== 'string') {
-        errorList.push({
-          success: 'false',
-          error: 'Request failed with status code 400',
-          errorMessage: `The request is invalid: field ${field}' must be a string`,
-        })
-      }
-    } else {
-      errorList.push({
-        success: 'false',
-        error: 'Request failed with status code 400',
-        errorMessage: `The request is invalid: field ${field}' must be a number or string`,
-      })
-    }
-  }
-
-  return errorList
-}
-/*
-
-
-  [
-    {
-      "id": 1,
-      "name": "EXM Larston Advanced Extra Comfort Guido Salcedo",
-      "categoryId": 3,
-      "brandId": 2000001,
-      "score": "5"
-    },
-    {
-      "id": 2,
-      "name": "EXM Larston Advanced Extra Comfort Guido Salcedo 2",
-      "categoryId": false,
-      "brandId": 2000001,
-      "score": "5"
-    }
-  ]
-*/
-/*
-
-const body = {
-      "id": 1,
-      "name": "EXM Larston Advanced Extra Comfort Guido Salcedo",
-      "categoryId": 3,
-      "brandId": 2000001,
-      "score": "5"
-    }
-
-body["score"] = "5"
-
-function encodeProperties(object: any, exceptions: string[]) {
-  for (const prop in object) {
-    if (exceptions.find(e => e === prop)) {
-      continue
-    } else if (Array.isArray(object[prop])) {
-      if (object[prop].length > 0) {
-        object[prop] = object[prop].map((element: string | number) => hash(element))
-      }
-    } else if (object[prop] === 'document') {
-      const documentArray = object[prop].split('')
-      const firstDigits = documentArray.length > 7 ? documentArray[0] + documentArray[1] : documentArray[0]
-      object[prop] = firstDigits + '-' + hash(object[prop])
-    } else {
-      if (!object[prop]) {
-        continue
-      } else {
-        object[prop] = hash(object[prop])
-      }
-    }
-  }
-}
-*/
-
-/*
-for (const field of fields) {
-  if (typeof field.value !== 'undefined' && typeof field.value !== null) {
-    if (field === 'name') {
-      if (typeof field.value === 'string') {
-        continue
-      } else {
-        errorList.push({
-          success: 'false',
-          error: 'Request failed with status code 400',
-          errorMessage: `The request is invalid: field ${field.name}' must be a string`,
-        })
-      }
-    }
-
-    if (field === 'id') {
-      if (typeof field.value === 'number') {
-        continue
-      } else {
-        errorList.push({
-          success: 'false',
-          error: 'Request failed with status code 400',
-          errorMessage: `The request is invalid: field ${field.name}' must be a number`,
-        })
-      }
-    }
-
-    if (
-      typeof field.value !== 'number' &&
-      typeof field.value !== 'string'
-    ) {
-      errorList.push({
-        success: 'false',
-        error: 'Request failed with status code 400',
-        errorMessage: `The request is invalid: field ${field.name}' must be a number or string`,
-      })
-    }
-  }
-} */

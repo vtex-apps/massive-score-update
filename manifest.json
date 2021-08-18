@@ -59,6 +59,13 @@
       }
     },
     {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "{{account}}.vtexcommercestable.com.br",
+        "path": "/api/catalog/pvt/*"
+      }
+    },
+    {
       "name": "colossus-fire-event"
     },
     {

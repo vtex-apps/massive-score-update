@@ -12,7 +12,7 @@
     },
     "catalog": {
       "path": "/_v/massive/catalog/score/update",
-      "public": false
+      "public": true
     }
   }
 }
