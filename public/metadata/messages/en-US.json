@@ -1,0 +1,14 @@
+{
+  "name": "Massive Score Update",
+  "headline": "Massive update of the score of the products and catalogs.",
+  "overview": "This application allows you to update the score of products and catalogs in batches.",
+  "features": [
+    "Reduction of integration times",
+    "Reduction of overhead of applications",
+    "Simplicity"
+  ],
+  "websiteURL": "https://vtex.com/",
+  "support": {
+    "url": "https://support.vtex.com/hc/requests"
+  }
+}

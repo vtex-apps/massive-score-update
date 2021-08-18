@@ -2,8 +2,9 @@ import type { ClientsConfig, ServiceContext, RecorderState } from '@vtex/api'
 import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
-import { status } from './middlewares/status'
-import { validate } from './middlewares/validate'
+import { productScoreMiddleware } from './middlewares/productScoreMiddleware'
+import { validateMiddleware } from './middlewares/validateMiddleware'
+import { catalogScoreMiddleware } from './middlewares/catalogScoreMiddleware'
 
 const TIMEOUT_MS = 800
 
@@ -36,7 +37,26 @@ declare global {
 
   // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
   interface State extends RecorderState {
-    code: number
+    validatedBody: UpdateRequest[]
+  }
+
+  interface UpdateRequest {
+    id: number | string
+    name: string
+    categoryId?: number | string
+    brandId?: number | string
+    score: number | string
+  }
+
+  interface UpdateResponse {
+    id?: number | string
+    name?: string
+    categoryId?: number | string
+    brandId?: number | string
+    score?: number | string
+    success: string
+    error?: string
+    errorMessage?: string
   }
 }
 
@@ -44,9 +64,11 @@ declare global {
 export default new Service({
   clients,
   routes: {
-    // `status` is the route ID from service.json. It maps to an array of middlewares (or a single handler).
-    status: method({
-      GET: [validate, status],
+    product: method({
+      PUT: [validateMiddleware, productScoreMiddleware],
+    }),
+    catalog: method({
+      PUT: [validateMiddleware, catalogScoreMiddleware],
     }),
   },
 })
