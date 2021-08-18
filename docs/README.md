@@ -20,7 +20,6 @@ Massive product and catalog score update service
   - score [int32] | [string]
 
 
-  
 >   Read the API information for more information [link](https://developers.vtex.com/vtex-rest-api/reference/catalog-api-product#catalog-api-put-product)
 
 ### Request body example
