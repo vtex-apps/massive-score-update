@@ -50,8 +50,7 @@ export async function catalogScoreMiddleware(
       const updateResponse = {
         id,
         name: arg.name,
-        categoryId: arg.categoryId,
-        brandId: arg.brandId,
+        score: arg.score,
         success: 'false',
         error: error.response.status,
         errorMessage: error.response.data,
