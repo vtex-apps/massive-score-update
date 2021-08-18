@@ -8,11 +8,7 @@ export async function validateMiddleware(
   const body = await json(ctx.req)
   const errorList: any[] = []
 
-  function fieldValidator(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    fields: UpdateRequest,
-    path: boolean
-  ): void {
+  function fieldValidator(fields: UpdateRequest, path: boolean): void {
     const elements: UpdateResponse[] = []
 
     const { id, name, categoryId, brandId, score } = fields
