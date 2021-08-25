@@ -120,7 +120,7 @@ Massive product and catalog score update service
 
 ## Flow
 
-![Massive score update flow](https://user-images.githubusercontent.com/33711188/129928859-5c4a0fe3-a295-4130-8698-43986b8b0e0d.png)
+![Massive score update flow](https://user-images.githubusercontent.com/33711188/130862181-3436f4e3-36e8-4cb0-9dac-8124efdb4a1e.png)
 
 ## Contributors ✨
 
