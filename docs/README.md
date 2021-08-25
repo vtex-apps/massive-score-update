@@ -14,9 +14,6 @@ Massive product and catalog score update service
 
 - Required
   - id [int32] | [string]
-  - name [int32]
-  - categoryId [int32] | [string]
-  - brandId [int32] | [string]
   - score [int32] | [string]
 
 
@@ -27,9 +24,6 @@ Massive product and catalog score update service
 [
     {
         "id": "1",
-        "name": "EXM Larston Advanced Extra Comfort",
-        "categoryId": 3,
-        "brandId": "2000001",
         "score": "4"
     }
 ]   
@@ -42,9 +36,6 @@ Massive product and catalog score update service
     "responseList": [
         {
             "id": 1,
-            "name": "EXM Larston Advanced Extra Comfort",
-            "categoryId": 3,
-            "brandId": 2000001,
             "score": 4,
             "success": "true"
         }
@@ -81,7 +72,6 @@ Massive product and catalog score update service
 
 - Required
   - id [int32] | [string]
-  - name [int32]
   - score [int32] | [string]
 
 >   Read the API information for more information [link](https://developers.vtex.com/vtex-rest-api/reference/catalog-api-category#catalog-api-put-category)
@@ -93,7 +83,6 @@ Massive product and catalog score update service
 [
     {
         "id": "3",
-        "name": "EXM Jeans",
         "score": "4"
     }
 ]
@@ -106,7 +95,6 @@ Massive product and catalog score update service
     "responseList": [
         {
             "id": 3,
-            "name": "EXM Jeans",
             "score": 4,
             "success": "true"
         }
