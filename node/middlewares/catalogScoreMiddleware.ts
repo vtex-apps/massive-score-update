@@ -32,15 +32,16 @@ export async function catalogScoreMiddleware(
   await next()
 
   async function scoreUpdate(arg: UpdateRequest): Promise<UpdateResponse> {
-    const { id } = arg
+    const { id, score } = arg
 
     try {
+      const category = await scoreRestClient.getCategory(id)
+
       const scoreGraphQLClientResponse =
-        await scoreRestClient.catalogScoreUpdate(arg, id)
+        await scoreRestClient.catalogScoreUpdate(category, score)
 
       const updateResponse: UpdateResponse = {
         id: scoreGraphQLClientResponse.Id,
-        name: scoreGraphQLClientResponse.Name,
         score: scoreGraphQLClientResponse.Score,
         success: 'true',
       }
@@ -49,8 +50,7 @@ export async function catalogScoreMiddleware(
     } catch (error) {
       const updateResponse = {
         id,
-        name: arg.name,
-        score: arg.score,
+        score,
         success: 'false',
         error: error.response.status,
         errorMessage: error.response.data,

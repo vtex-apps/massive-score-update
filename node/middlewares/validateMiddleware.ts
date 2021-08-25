@@ -5,67 +5,40 @@ export async function validateMiddleware(
   ctx: Context,
   next: () => Promise<any>
 ) {
-  const body = await json(ctx.req)
+  const requestList = await json(ctx.req)
   const errorList: any[] = []
 
-  function fieldValidator(fields: UpdateRequest, path: boolean): void {
-    const elements: UpdateResponse[] = []
+  function requestValidator(request: UpdateRequest): void {
+    const requestErrorList: UpdateResponse[] = []
 
-    const { id, name, categoryId, brandId, score } = fields
+    const { id, score } = request
 
     if (!id) {
-      elements.push({
-        success: 'false',
-        error: 'Request failed with status code 400',
-        errorMessage: `The request is invalid:  The 'id' field is required.`,
-      })
-    }
-
-    if (!name) {
-      elements.push({
-        success: 'false',
-        error: 'Request failed with status code 400',
-        errorMessage: `The request is invalid:  The 'name' field is required.`,
-      })
-    }
-
-    if (!categoryId && path) {
-      elements.push({
-        success: 'false',
-        error: 'Request failed with status code 400',
-        errorMessage: `The request is invalid: The 'categoryId' field is required.`,
-      })
-    }
-
-    if (!brandId && path) {
-      elements.push({
-        success: 'false',
-        error: 'Request failed with status code 400',
-        errorMessage: `The request is invalid: The 'brandId' field is required.`,
-      })
+      requestErrorList.push(errorResponseGenerator('id'))
     }
 
     if (!score) {
-      elements.push({
-        success: 'false',
-        error: 'Request failed with status code 400',
-        errorMessage: `The request is invalid: The 'score' field is required.`,
-      })
+      requestErrorList.push(errorResponseGenerator('score'))
     }
 
-    if (elements.length >= 1) {
-      errorList.push(elements)
+    if (requestErrorList.length >= 1) {
+      errorList.push(requestErrorList)
+    }
+
+    function errorResponseGenerator(field: string): UpdateResponse {
+      return {
+        success: 'false',
+        error: 'Request failed with status code 400',
+        errorMessage: `The request is invalid:  The '${field}' field is required.`,
+      }
     }
   }
 
   try {
-    const endpointIdentifier = ctx.url.includes('product/score')
-
-    for (const product of body) {
-      fieldValidator(product, endpointIdentifier)
+    for (const request of requestList) {
+      requestValidator(request)
     }
   } catch (error) {
-    // eslint-disable-next-line no-console
     throw new UserInputError(error)
   }
 
@@ -78,7 +51,7 @@ export async function validateMiddleware(
     return
   }
 
-  ctx.state.validatedBody = body
+  ctx.state.validatedBody = requestList
 
   await next()
 }

@@ -32,17 +32,15 @@ export async function productScoreMiddleware(
   await next()
 
   async function scoreUpdate(arg: UpdateRequest): Promise<UpdateResponse> {
-    const { id } = arg
+    const { id, score } = arg
 
     try {
+      const product = await scoreRestClient.getProduct(id)
       const scoreGraphQLClientResponse =
-        await scoreRestClient.productScoreUpdate(arg, id)
+        await scoreRestClient.productScoreUpdate(product, score)
 
       const productMiddlewareResponse: UpdateResponse = {
         id: scoreGraphQLClientResponse.Id,
-        name: scoreGraphQLClientResponse.Name,
-        categoryId: scoreGraphQLClientResponse.CategoryId,
-        brandId: scoreGraphQLClientResponse.BrandId,
         score: scoreGraphQLClientResponse.Score,
         success: 'true',
       }
@@ -51,9 +49,6 @@ export async function productScoreMiddleware(
     } catch (error) {
       const productMiddlewareResponse = {
         id,
-        name: arg.name,
-        categoryId: arg.categoryId,
-        brandId: arg.brandId,
         score: arg.score,
         success: 'false',
         error: error.response.status,

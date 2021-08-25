@@ -42,17 +42,11 @@ declare global {
 
   interface UpdateRequest {
     id: number | string
-    name: string
-    categoryId?: number | string
-    brandId?: number | string
     score: number | string
   }
 
   interface UpdateResponse {
     id?: number | string
-    name?: string
-    categoryId?: number | string
-    brandId?: number | string
     score?: number | string
     success: string
     error?: string
