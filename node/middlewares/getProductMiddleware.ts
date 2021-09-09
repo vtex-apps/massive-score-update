@@ -1,23 +1,22 @@
-import { ResponseCategory } from "../clients/scoreRestClient"
+import { ResponseProduct } from "../clients/scoreRestClient"
 
-export async function catalogScoreMiddleware(
+export async function getProductMiddleware(
   ctx: Context,
   next: () => Promise<any>
 ) {
+
   const {
-    state: { catalogs, validatedBody },
+    state: { validatedBody },
     clients: { scoreRestClient },
   } = ctx
 
+
   const responseList: UpdateResponse[] = []
-
-  const categoriesFound: ResponseCategory[] = catalogs
-
 
   try {
     const expected = await operationRetry(await Promise.all(
       validatedBody.map(async (arg) => {
-        return updateScore(arg)
+        return getProduct(arg)
       })
     ))
 
@@ -30,58 +29,36 @@ export async function catalogScoreMiddleware(
         return e.success === 'false'
       })
 
-      ctx.status = 200
-      ctx.body = {
-        successfulResponses: {
-          elements: successfulResponses,
-          quantity: successfulResponses.length,
-        },
-        failedResponses: {
-          elements: failedResponses,
-          quantity: failedResponses.length,
-        },
-        total: responseList.length,
+      if (failedResponses.length >= 1) {
+        ctx.status = 404
+        ctx.body = {
+          failedResponses: {
+            elements: failedResponses,
+            quantity: failedResponses.length,
+          },
+        }
+        return
       }
-
+      ctx.state.products = successfulResponses
       await next()
     }
   } catch (error) {
     ctx.status = 500
     ctx.body = error
-    await next()
+    return
   }
 
-
-
-
-
-  async function updateScore(updateRequest: UpdateRequest): Promise<UpdateResponse> {
+  async function getProduct(updateRequest: UpdateRequest): Promise<any> {
     const { id, score } = updateRequest
 
-
     try {
+      const product: ResponseProduct = await scoreRestClient.getProduct(id)
 
-      const category = categoriesFound.find(p => { return p.Id === id })
 
-      if (category) {
-        const scoreGraphQLClientResponse =
-          await scoreRestClient.catalogScoreUpdate(category, score)
-
-        const productMiddlewareResponse: UpdateResponse = {
-          id: scoreGraphQLClientResponse.Id,
-          score: scoreGraphQLClientResponse.Score,
-          success: 'true',
-        }
-
-        return productMiddlewareResponse
-
-      } else {
-        throw new Error('404')
-      }
-
+      return product
     } catch (error) {
       const data = error.response ? error.response.data : ''
-      const updateScoreRestClientErrorResponse = {
+      const productRestClientErrorResponse: UpdateResponse = {
         id,
         success: 'false',
         score,
@@ -90,18 +67,20 @@ export async function catalogScoreMiddleware(
       }
 
       if (error.response && error.response.status === 429) {
-        updateScoreRestClientErrorResponse.errorMessage = error.response
+        productRestClientErrorResponse.errorMessage = error.response
           ? error.response.headers['ratelimit-reset']
           : ''
       }
 
-      return updateScoreRestClientErrorResponse
+      return productRestClientErrorResponse
     }
   }
 
   async function operationRetry(
-    updateResponseList: UpdateResponse[]
+    updateResponseList: any[]
   ): Promise<any> {
+
+
     addResponsesSuccessfulUpdates(updateResponseList)
 
     const response = await findStoppedRequests(updateResponseList)
@@ -111,7 +90,7 @@ export async function catalogScoreMiddleware(
 
   async function findStoppedRequests(
     // eslint-disable-next-line @typescript-eslint/no-shadow
-    responseList: UpdateResponse[]
+    responseList: any[]
   ): Promise<any> {
     const retryList: UpdateRequest[] = []
     let value = '0'
@@ -148,7 +127,7 @@ export async function catalogScoreMiddleware(
 
       retryOperation = await Promise.all(
         retryList.map(async (item) => {
-          return updateScore(item)
+          return getProduct(item)
         })
       )
 
@@ -159,15 +138,16 @@ export async function catalogScoreMiddleware(
   }
 
   function addResponsesSuccessfulUpdates(
-    updateResponseList: UpdateResponse[]
+    updateResponseList: any[]
   ): void {
     for (const index in updateResponseList) {
       const updateResponse = updateResponseList[index]
-
       if (updateResponse.error !== 429) {
         responseList.push(updateResponse)
+
       }
     }
   }
+
 
 }
