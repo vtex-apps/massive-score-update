@@ -3,10 +3,13 @@ import { LRUCache, method, Service } from '@vtex/api'
 
 import { Clients } from './clients'
 import { productScoreMiddleware } from './middlewares/productScoreMiddleware'
+import { getProductMiddleware } from './middlewares/getProductMiddleware'
+import { getCatalogMiddleware } from './middlewares/getCatalogMiddleware'
+
 import { validateMiddleware } from './middlewares/validateMiddleware'
 import { catalogScoreMiddleware } from './middlewares/catalogScoreMiddleware'
 
-const TIMEOUT_MS = 800
+const TIMEOUT_MS = 600000
 
 // Create a LRU memory cache for the Status client.
 // The @vtex/api HttpClient respects Cache-Control headers and uses the provided cache.
@@ -21,7 +24,7 @@ const clients: ClientsConfig<Clients> = {
   options: {
     // All IO Clients will be initialized with these options, unless otherwise specified.
     default: {
-      retries: 2,
+
       timeout: TIMEOUT_MS,
     },
     // This key will be merged with the default options and add this cache to our Status client.
@@ -37,19 +40,21 @@ declare global {
 
   // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
   interface State extends RecorderState {
-    validatedBody: UpdateRequest[]
+    validatedBody: UpdateRequest[],
+    products: any,
+    catalogs: any,
   }
 
   interface UpdateRequest {
-    id: number | string
-    score: number | string
+    id: number 
+    score: number 
   }
 
   interface UpdateResponse {
-    id?: number | string
-    score?: number | string
+    id: number 
+    score: number 
     success: string
-    error?: string
+    error?: number
     errorMessage?: string
   }
 }
@@ -59,10 +64,10 @@ export default new Service({
   clients,
   routes: {
     product: method({
-      PUT: [validateMiddleware, productScoreMiddleware],
+      PUT: [validateMiddleware, getProductMiddleware, productScoreMiddleware],
     }),
     catalog: method({
-      PUT: [validateMiddleware, catalogScoreMiddleware],
+      PUT: [validateMiddleware, getCatalogMiddleware, catalogScoreMiddleware],
     }),
   },
 })

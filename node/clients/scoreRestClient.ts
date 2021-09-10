@@ -1,9 +1,8 @@
-import type { InstanceOptions, IOContext } from '@vtex/api'
-import { ExternalClient } from '@vtex/api'
+import { InstanceOptions, IOContext, JanusClient } from '@vtex/api'
 
-export default class ScoreRestClient extends ExternalClient {
+export default class ScoreRestClient extends JanusClient {
   constructor(context: IOContext, options?: InstanceOptions) {
-    super(`https://${context.account}.vtexcommercestable.com.br`, context, {
+    super(context, {
       ...options,
       headers: {
         VtexIdClientAutCookie:
@@ -21,7 +20,7 @@ export default class ScoreRestClient extends ExternalClient {
     body: ResponseProduct,
     score: number | string
   ): Promise<ScoreUpdateResponse> {
-    return this.http.put(`/api/catalog/pvt/product/${body.Id}`, {
+    return this.http.put(`http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${body.Id}`, {
       Name: body.Name,
       DepartmentId: body.DepartmentId,
       CategoryId: body.CategoryId,
@@ -49,7 +48,7 @@ export default class ScoreRestClient extends ExternalClient {
     body: ResponseCategory,
     score: number | string
   ): Promise<ScoreUpdateResponse> {
-    return this.http.put(`/api/catalog/pvt/category/${body.Id}`, {
+    return this.http.put(`http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${body.Id}`, {
       Name: body.Name,
       FatherCategoryId: body.FatherCategoryId,
       Title: body.Title,
@@ -72,13 +71,13 @@ export default class ScoreRestClient extends ExternalClient {
   public async getCategory(
     catalogId: number | string
   ): Promise<ResponseCategory> {
-    return this.http.get(`/api/catalog/pvt/category/${catalogId}`)
+    return this.http.get(`http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${catalogId}`)
   }
 
   public async getProduct(
     productId: number | string
   ): Promise<ResponseProduct> {
-    return this.http.get(`/api/catalog/pvt/product/${productId}`)
+    return this.http.get(`http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${productId}`)
   }
 }
 export interface ScoreUpdateResponse {

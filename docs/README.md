@@ -13,8 +13,8 @@ Massive product and catalog score update service
 ### Path params
 
 - Required
-  - id [int32] | [string]
-  - score [int32] | [string]
+  - id [int32]
+  - score [int32]
 
 
 >   Read the API information for more information [link](https://developers.vtex.com/vtex-rest-api/reference/catalog-api-product#catalog-api-put-product)
@@ -33,13 +33,21 @@ Massive product and catalog score update service
 
 ```json
 {
-    "responseList": [
-        {
-            "id": 1,
-            "score": 4,
-            "success": "true"
-        }
-    ]
+    "successfulResponses": {
+        "elements": [
+            {
+                "id": 1,
+                "score": 4,
+                "success": "true"
+            }
+        ],
+        "quantity": 1
+    },
+    "failedResponses": {
+        "elements": [],
+        "quantity": 0
+    },
+    "total": 1
 }
 ```
 
@@ -47,15 +55,19 @@ Massive product and catalog score update service
 
 ```json
 {
-    "errorList": [
-        [
-            {
-                "success": "false",
-                "error": "Request failed with status code 400",
-                "errorMessage": "The request is invalid: The 'brandId' field is required."
-            }
-        ]
-    ]
+    "failedResponses": {
+        "elements": [
+            [
+                {
+                    "score": "4",
+                    "success": "false",
+                    "error": 400,
+                    "errorMessage": "The request is invalid: The 'id' field is required."
+                }
+            ]
+        ],
+        "quantity": 1
+    }
 }
 ```
 ---
@@ -71,8 +83,8 @@ Massive product and catalog score update service
 ### Path params
 
 - Required
-  - id [int32] | [string]
-  - score [int32] | [string]
+  - id [int32]
+  - score [int32]
 
 >   Read the API information for more information [link](https://developers.vtex.com/vtex-rest-api/reference/catalog-api-category#catalog-api-put-category)
 
@@ -92,13 +104,21 @@ Massive product and catalog score update service
 
 ```json
 {
-    "responseList": [
-        {
-            "id": 3,
-            "score": 4,
-            "success": "true"
-        }
-    ]
+    "successfulResponses": {
+        "elements": [
+            {
+                "id": 3,
+                "score": 6,
+                "success": "true"
+            }
+        ],
+        "quantity": 1
+    },
+    "failedResponses": {
+        "elements": [],
+        "quantity": 0
+    },
+    "total": 1
 }
 ```
 
@@ -106,21 +126,26 @@ Massive product and catalog score update service
 
 ```json
 {
-    "errorList": [
-        [
-            {
-                "success": "false",
-                "error": "Request failed with status code 400",
-                "errorMessage": "The request is invalid: The 'score' field is required."
-            }
-        ]
-    ]
+    "failedResponses": {
+        "elements": [
+            [
+                {
+                    "score": "6",
+                    "success": "false",
+                    "error": 400,
+                    "errorMessage": "The request is invalid: The 'id' field is required."
+                }
+            ]
+        ],
+        "quantity": 1
+    }
 }
 ```
 
 ## Flow
 
-![Massive score update flow](https://user-images.githubusercontent.com/33711188/130862181-3436f4e3-36e8-4cb0-9dac-8124efdb4a1e.png)
+![Massive score update flow](https://user-images.githubusercontent.com/33711188/132861772-a09ddf58-c326-4d43-bd57-0f4c5157e681.png)
+
 
 ## Contributors ✨
 
