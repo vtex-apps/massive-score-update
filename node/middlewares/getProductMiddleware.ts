@@ -1,24 +1,24 @@
-import { ResponseProduct } from "../clients/scoreRestClient"
+import type { ResponseProduct } from '../clients/scoreRestClient'
 
 export async function getProductMiddleware(
   ctx: Context,
   next: () => Promise<any>
 ) {
-
   const {
     state: { validatedBody },
     clients: { scoreRestClient },
   } = ctx
 
-
   const responseList: UpdateResponse[] = []
 
   try {
-    const expected = await operationRetry(await Promise.all(
-      validatedBody.map(async (arg) => {
-        return getProduct(arg)
-      })
-    ))
+    const expected = await operationRetry(
+      await Promise.all(
+        validatedBody.map(async (arg) => {
+          return getProduct(arg)
+        })
+      )
+    )
 
     if (expected) {
       const successfulResponses: UpdateResponse[] = responseList.filter((e) => {
@@ -37,15 +37,16 @@ export async function getProductMiddleware(
             quantity: failedResponses.length,
           },
         }
+
         return
       }
+
       ctx.state.products = successfulResponses
       await next()
     }
   } catch (error) {
     ctx.status = 500
     ctx.body = error
-    return
   }
 
   async function getProduct(updateRequest: UpdateRequest): Promise<any> {
@@ -53,7 +54,6 @@ export async function getProductMiddleware(
 
     try {
       const product: ResponseProduct = await scoreRestClient.getProduct(id)
-
 
       return product
     } catch (error) {
@@ -76,11 +76,7 @@ export async function getProductMiddleware(
     }
   }
 
-  async function operationRetry(
-    updateResponseList: any[]
-  ): Promise<any> {
-
-
+  async function operationRetry(updateResponseList: any[]): Promise<any> {
     addResponsesSuccessfulUpdates(updateResponseList)
 
     const response = await findStoppedRequests(updateResponseList)
@@ -111,7 +107,6 @@ export async function getProductMiddleware(
           retryList.push({
             id: response.id,
             score: response.score,
-
           })
         }
       }
@@ -137,17 +132,13 @@ export async function getProductMiddleware(
     return true
   }
 
-  function addResponsesSuccessfulUpdates(
-    updateResponseList: any[]
-  ): void {
+  function addResponsesSuccessfulUpdates(updateResponseList: any[]): void {
     for (const index in updateResponseList) {
       const updateResponse = updateResponseList[index]
+
       if (updateResponse.error !== 429) {
         responseList.push(updateResponse)
-
       }
     }
   }
-
-
 }

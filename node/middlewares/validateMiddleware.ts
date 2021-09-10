@@ -15,44 +15,43 @@ export async function validateMiddleware(
 
     if (!id) {
       requestErrorList.push(errorResponseGenerator('id', 1))
-    } else {
-      if (!(typeof id === 'number')) {
-        requestErrorList.push(errorResponseGenerator('id', 2))
-
-      }
+    } else if (!(typeof id === 'number')) {
+      requestErrorList.push(errorResponseGenerator('id', 2))
     }
 
     if (!score) {
       requestErrorList.push(errorResponseGenerator('score', 1))
-    } else {
-      if (!(typeof score === 'number')) {
-        requestErrorList.push(errorResponseGenerator('score', 2))
-
-      }
+    } else if (!(typeof score === 'number')) {
+      requestErrorList.push(errorResponseGenerator('score', 2))
     }
 
     if (requestErrorList.length >= 1) {
       errorList.push(requestErrorList)
     }
 
-    function errorResponseGenerator(field: string, option: number): UpdateResponse {
+    function errorResponseGenerator(
+      field: string,
+      option: number
+    ): UpdateResponse {
       const response: UpdateResponse = {
         id,
         score,
         success: 'false',
         error: 400,
-
       }
+
       if (option === 1) {
         response.errorMessage = `The request is invalid: The '${field}' field is required.`
-        return response
-      } else {
-        response.errorMessage = `The request is invalid: field ${field}' must be a number.`
+
         return response
       }
+
+      response.errorMessage = `The request is invalid: field ${field}' must be a number.`
+
+      return response
     }
   }
-  
+
   try {
     for (const request of requestList) {
       requestValidator(request)

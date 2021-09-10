@@ -1,4 +1,4 @@
-import { ResponseProduct } from "../clients/scoreRestClient"
+import type { ResponseProduct } from '../clients/scoreRestClient'
 
 export async function productScoreMiddleware(
   ctx: Context,
@@ -13,13 +13,14 @@ export async function productScoreMiddleware(
 
   const productsFound: ResponseProduct[] = products
 
-
   try {
-    const expected = await operationRetry(await Promise.all(
-      validatedBody.map(async (arg) => {
-        return updateScore(arg)
-      })
-    ))
+    const expected = await operationRetry(
+      await Promise.all(
+        validatedBody.map(async (arg) => {
+          return updateScore(arg)
+        })
+      )
+    )
 
     if (expected) {
       const successfulResponses: UpdateResponse[] = responseList.filter((e) => {
@@ -51,17 +52,15 @@ export async function productScoreMiddleware(
     await next()
   }
 
-
-
-
-
-  async function updateScore(updateRequest: UpdateRequest): Promise<UpdateResponse> {
+  async function updateScore(
+    updateRequest: UpdateRequest
+  ): Promise<UpdateResponse> {
     const { id, score } = updateRequest
-    
-    
-    try {
 
-      const product = productsFound.find(p => { return p.Id === id })
+    try {
+      const product = productsFound.find((p) => {
+        return p.Id === id
+      })
 
       if (product) {
         const scoreGraphQLClientResponse =
@@ -74,11 +73,9 @@ export async function productScoreMiddleware(
         }
 
         return productMiddlewareResponse
-
-      } else {
-        throw new Error('404')
       }
 
+      throw new Error('404')
     } catch (error) {
       const data = error.response ? error.response.data : ''
       const updateScoreRestClientErrorResponse = {
@@ -132,7 +129,6 @@ export async function productScoreMiddleware(
           retryList.push({
             id: response.id,
             score: response.score,
-
           })
         }
       }
@@ -169,5 +165,4 @@ export async function productScoreMiddleware(
       }
     }
   }
-
 }

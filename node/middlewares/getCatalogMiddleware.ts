@@ -1,28 +1,26 @@
-import { ResponseCategory } from "../clients/scoreRestClient"
+import type { ResponseCategory } from '../clients/scoreRestClient'
 
 export async function getCatalogMiddleware(
   ctx: Context,
   next: () => Promise<any>
 ) {
-
   const {
     state: { validatedBody },
     clients: { scoreRestClient },
   } = ctx
 
-
   const responseList: UpdateResponse[] = []
 
   try {
-    const expected = await operationRetry(await Promise.all(
-      validatedBody.map(async (arg) => {
-        return getProduct(arg)
-      })
-    ))
+    const expected = await operationRetry(
+      await Promise.all(
+        validatedBody.map(async (arg) => {
+          return getProduct(arg)
+        })
+      )
+    )
 
     if (expected) {
-
-        console.log('catalog list', responseList)
       const successfulResponses: UpdateResponse[] = responseList.filter((e) => {
         return e.success !== 'false'
       })
@@ -39,15 +37,16 @@ export async function getCatalogMiddleware(
             quantity: failedResponses.length,
           },
         }
+
         return
       }
+
       ctx.state.catalogs = successfulResponses
       await next()
     }
   } catch (error) {
     ctx.status = 500
     ctx.body = error
-    return
   }
 
   async function getProduct(updateRequest: UpdateRequest): Promise<any> {
@@ -55,7 +54,7 @@ export async function getCatalogMiddleware(
 
     try {
       const category: ResponseCategory = await scoreRestClient.getCategory(id)
-      console.log('category obtenida', category)
+
       return category
     } catch (error) {
       const data = error.response ? error.response.data : ''
@@ -77,11 +76,7 @@ export async function getCatalogMiddleware(
     }
   }
 
-  async function operationRetry(
-    updateResponseList: any[]
-  ): Promise<any> {
-
-
+  async function operationRetry(updateResponseList: any[]): Promise<any> {
     addResponsesSuccessfulUpdates(updateResponseList)
 
     const response = await findStoppedRequests(updateResponseList)
@@ -112,7 +107,6 @@ export async function getCatalogMiddleware(
           retryList.push({
             id: response.id,
             score: response.score,
-
           })
         }
       }
@@ -138,17 +132,13 @@ export async function getCatalogMiddleware(
     return true
   }
 
-  function addResponsesSuccessfulUpdates(
-    updateResponseList: any[]
-  ): void {
+  function addResponsesSuccessfulUpdates(updateResponseList: any[]): void {
     for (const index in updateResponseList) {
       const updateResponse = updateResponseList[index]
+
       if (updateResponse.error !== 429) {
         responseList.push(updateResponse)
-
       }
     }
   }
-
-
 }

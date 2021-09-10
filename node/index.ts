@@ -5,7 +5,6 @@ import { Clients } from './clients'
 import { productScoreMiddleware } from './middlewares/productScoreMiddleware'
 import { getProductMiddleware } from './middlewares/getProductMiddleware'
 import { getCatalogMiddleware } from './middlewares/getCatalogMiddleware'
-
 import { validateMiddleware } from './middlewares/validateMiddleware'
 import { catalogScoreMiddleware } from './middlewares/catalogScoreMiddleware'
 
@@ -24,7 +23,6 @@ const clients: ClientsConfig<Clients> = {
   options: {
     // All IO Clients will be initialized with these options, unless otherwise specified.
     default: {
-
       timeout: TIMEOUT_MS,
     },
     // This key will be merged with the default options and add this cache to our Status client.
@@ -40,19 +38,19 @@ declare global {
 
   // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
   interface State extends RecorderState {
-    validatedBody: UpdateRequest[],
-    products: any,
-    catalogs: any,
+    validatedBody: UpdateRequest[]
+    products: any
+    catalogs: any
   }
 
   interface UpdateRequest {
-    id: number 
-    score: number 
+    id: number
+    score: number
   }
 
   interface UpdateResponse {
-    id: number 
-    score: number 
+    id: number
+    score: number
     success: string
     error?: number
     errorMessage?: string

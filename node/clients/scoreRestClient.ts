@@ -1,4 +1,5 @@
-import { InstanceOptions, IOContext, JanusClient } from '@vtex/api'
+import type { InstanceOptions, IOContext } from '@vtex/api'
+import { JanusClient } from '@vtex/api'
 
 export default class ScoreRestClient extends JanusClient {
   constructor(context: IOContext, options?: InstanceOptions) {
@@ -20,64 +21,74 @@ export default class ScoreRestClient extends JanusClient {
     body: ResponseProduct,
     score: number | string
   ): Promise<ScoreUpdateResponse> {
-    return this.http.put(`http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${body.Id}`, {
-      Name: body.Name,
-      DepartmentId: body.DepartmentId,
-      CategoryId: body.CategoryId,
-      BrandId: body.BrandId,
-      LinkId: body.LinkId,
-      RefId: body.RefId,
-      IsVisible: body.IsVisible,
-      Description: body.Description,
-      DescriptionShort: body.DescriptionShort,
-      ReleaseDate: body.ReleaseDate,
-      KeyWords: body.KeyWords,
-      Title: body.Title,
-      IsActive: body.IsActive,
-      TaxCode: body.TaxCode,
-      MetaTagDescription: body.MetaTagDescription,
-      SupplierId: body.SupplierId,
-      ShowWithoutStock: body.ShowWithoutStock,
-      AdWordsRemarketingCode: body.AdWordsRemarketingCode,
-      LomadeeCampaignCode: body.LomadeeCampaignCode,
-      Score: score,
-    })
+    return this.http.put(
+      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${body.Id}`,
+      {
+        Name: body.Name,
+        DepartmentId: body.DepartmentId,
+        CategoryId: body.CategoryId,
+        BrandId: body.BrandId,
+        LinkId: body.LinkId,
+        RefId: body.RefId,
+        IsVisible: body.IsVisible,
+        Description: body.Description,
+        DescriptionShort: body.DescriptionShort,
+        ReleaseDate: body.ReleaseDate,
+        KeyWords: body.KeyWords,
+        Title: body.Title,
+        IsActive: body.IsActive,
+        TaxCode: body.TaxCode,
+        MetaTagDescription: body.MetaTagDescription,
+        SupplierId: body.SupplierId,
+        ShowWithoutStock: body.ShowWithoutStock,
+        AdWordsRemarketingCode: body.AdWordsRemarketingCode,
+        LomadeeCampaignCode: body.LomadeeCampaignCode,
+        Score: score,
+      }
+    )
   }
 
   public async catalogScoreUpdate(
     body: ResponseCategory,
     score: number | string
   ): Promise<ScoreUpdateResponse> {
-    return this.http.put(`http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${body.Id}`, {
-      Name: body.Name,
-      FatherCategoryId: body.FatherCategoryId,
-      Title: body.Title,
-      Description: body.Description,
-      Keywords: body.Keywords,
-      IsActive: body.IsActive,
-      LomadeeCampaignCode: body.LomadeeCampaignCode,
-      AdWordsRemarketingCode: body.AdWordsRemarketingCode,
-      ShowInStoreFront: body.ShowInStoreFront,
-      ShowBrandFilter: body.ShowBrandFilter,
-      ActiveStoreFrontLink: body.ActiveStoreFrontLink,
-      GlobalCategoryId: body.GlobalCategoryId,
-      StockKeepingUnitSelectionMode: body.StockKeepingUnitSelectionMode,
-      Score: score,
-      LinkId: body.LinkId,
-      HasChildren: body.HasChildren,
-    })
+    return this.http.put(
+      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${body.Id}`,
+      {
+        Name: body.Name,
+        FatherCategoryId: body.FatherCategoryId,
+        Title: body.Title,
+        Description: body.Description,
+        Keywords: body.Keywords,
+        IsActive: body.IsActive,
+        LomadeeCampaignCode: body.LomadeeCampaignCode,
+        AdWordsRemarketingCode: body.AdWordsRemarketingCode,
+        ShowInStoreFront: body.ShowInStoreFront,
+        ShowBrandFilter: body.ShowBrandFilter,
+        ActiveStoreFrontLink: body.ActiveStoreFrontLink,
+        GlobalCategoryId: body.GlobalCategoryId,
+        StockKeepingUnitSelectionMode: body.StockKeepingUnitSelectionMode,
+        Score: score,
+        LinkId: body.LinkId,
+        HasChildren: body.HasChildren,
+      }
+    )
   }
 
   public async getCategory(
     catalogId: number | string
   ): Promise<ResponseCategory> {
-    return this.http.get(`http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${catalogId}`)
+    return this.http.get(
+      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${catalogId}`
+    )
   }
 
   public async getProduct(
     productId: number | string
   ): Promise<ResponseProduct> {
-    return this.http.get(`http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${productId}`)
+    return this.http.get(
+      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${productId}`
+    )
   }
 }
 export interface ScoreUpdateResponse {

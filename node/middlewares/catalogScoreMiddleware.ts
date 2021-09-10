@@ -1,4 +1,4 @@
-import { ResponseCategory } from "../clients/scoreRestClient"
+import type { ResponseCategory } from '../clients/scoreRestClient'
 
 export async function catalogScoreMiddleware(
   ctx: Context,
@@ -13,13 +13,14 @@ export async function catalogScoreMiddleware(
 
   const categoriesFound: ResponseCategory[] = catalogs
 
-
   try {
-    const expected = await operationRetry(await Promise.all(
-      validatedBody.map(async (arg) => {
-        return updateScore(arg)
-      })
-    ))
+    const expected = await operationRetry(
+      await Promise.all(
+        validatedBody.map(async (arg) => {
+          return updateScore(arg)
+        })
+      )
+    )
 
     if (expected) {
       const successfulResponses: UpdateResponse[] = responseList.filter((e) => {
@@ -51,17 +52,15 @@ export async function catalogScoreMiddleware(
     await next()
   }
 
-
-
-
-
-  async function updateScore(updateRequest: UpdateRequest): Promise<UpdateResponse> {
+  async function updateScore(
+    updateRequest: UpdateRequest
+  ): Promise<UpdateResponse> {
     const { id, score } = updateRequest
 
-
     try {
-
-      const category = categoriesFound.find(p => { return p.Id === id })
+      const category = categoriesFound.find((p) => {
+        return p.Id === id
+      })
 
       if (category) {
         const scoreGraphQLClientResponse =
@@ -74,11 +73,9 @@ export async function catalogScoreMiddleware(
         }
 
         return productMiddlewareResponse
-
-      } else {
-        throw new Error('404')
       }
 
+      throw new Error('404')
     } catch (error) {
       const data = error.response ? error.response.data : ''
       const updateScoreRestClientErrorResponse = {
@@ -132,7 +129,6 @@ export async function catalogScoreMiddleware(
           retryList.push({
             id: response.id,
             score: response.score,
-
           })
         }
       }
@@ -169,5 +165,4 @@ export async function catalogScoreMiddleware(
       }
     }
   }
-
 }
