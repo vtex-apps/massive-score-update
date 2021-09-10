@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Fix retry process for 429 error cases to the Catalog API
 
-## [1.0.6] - 2021-09-10
+
 
 ## [1.0.5] - 2021-08-25
 
