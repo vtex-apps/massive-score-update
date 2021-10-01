@@ -4,61 +4,30 @@ export async function getProductMiddleware(
   ctx: Context,
   next: () => Promise<any>
 ) {
+  // eslint-disable-next-line no-console
+  console.log('Entro al getProductMiddleware')
   const {
     state: { validatedBody },
     clients: { scoreRestClient },
   } = ctx
 
-  const responseList: UpdateResponse[] = []
-
-  try {
-    const expected = await operationRetry(
-      await Promise.all(
-        validatedBody.map(async (arg) => {
-          return getProduct(arg)
-        })
-      )
-    )
-
-    if (expected) {
-      const successfulResponses: UpdateResponse[] = responseList.filter((e) => {
-        return e.success !== 'false'
-      })
-
-      const failedResponses: UpdateResponse[] = responseList.filter((e) => {
-        return e.success === 'false'
-      })
-
-      if (failedResponses.length >= 1) {
-        ctx.status = 404
-        ctx.body = {
-          failedResponses: {
-            elements: failedResponses,
-            quantity: failedResponses.length,
-          },
-        }
-
-        return
-      }
-
-      ctx.state.products = successfulResponses
-      await next()
-    }
-  } catch (error) {
-    ctx.status = 500
-    ctx.body = error
+  const responseManager: ResponseManager = {
+    updateResponse: [],
+    responseProduct: [],
+    responseCategory: [],
+    errors429: [],
   }
 
-  async function getProduct(updateRequest: UpdateRequest): Promise<any> {
+  async function getProduct(updateRequest: BodyRequest): Promise<void> {
     const { id, score } = updateRequest
 
     try {
       const product: ResponseProduct = await scoreRestClient.getProduct(id)
 
-      return product
+      responseManager.responseProduct.push(product)
     } catch (error) {
       const data = error.response ? error.response.data : ''
-      const productRestClientErrorResponse: UpdateResponse = {
+      const productRestClientErrorResponse: BodyResponse = {
         id,
         success: 'false',
         score,
@@ -70,75 +39,111 @@ export async function getProductMiddleware(
         productRestClientErrorResponse.errorMessage = error.response
           ? error.response.headers['ratelimit-reset']
           : ''
+        responseManager.errors429.push(productRestClientErrorResponse)
       }
 
-      return productRestClientErrorResponse
+      responseManager.updateResponse.push(productRestClientErrorResponse)
     }
   }
 
-  async function operationRetry(updateResponseList: any[]): Promise<any> {
-    addResponsesSuccessfulUpdates(updateResponseList)
-
-    const response = await findStoppedRequests(updateResponseList)
-
-    return response
-  }
-
-  async function findStoppedRequests(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    responseList: any[]
-  ): Promise<any> {
-    const retryList: UpdateRequest[] = []
+  async function retryCall() {
+    const retryList: BodyRequest[] = []
     let value = '0'
 
-    if (responseList.length >= 1) {
-      for (const index in responseList) {
-        const response = responseList[index]
+    if (responseManager.errors429.length >= 1) {
+      for (const index in responseManager.errors429) {
+        const errorResponse = responseManager.errors429[index]
 
-        if (response.error && response.error === 429) {
-          if (response.errorMessage && response.errorMessage > value) {
-            value = response.errorMessage
-          }
-
-          if (value === '0') {
-            value = '20'
-          }
-
-          retryList.push({
-            id: response.id,
-            score: response.score,
-          })
+        if (errorResponse.errorMessage && errorResponse.errorMessage > value) {
+          value = errorResponse.errorMessage
         }
+
+        if (value === '0') {
+          value = '20' // TODO: hacerlo parametrizable
+        }
+
+        retryList.push({
+          id: errorResponse.id,
+          score: errorResponse.score,
+        })
       }
     }
 
     if (retryList.length >= 1) {
-      let retryOperation: UpdateResponse[] = []
-
       const awaitTimeout = (delay: string) =>
         new Promise((resolve) => setTimeout(resolve, parseFloat(delay) * 1000))
 
       await awaitTimeout(value)
 
-      retryOperation = await Promise.all(
+      // eslint-disable-next-line no-console
+      console.log(
+        'UpdateResponse antes de la limpieza',
+        responseManager.updateResponse
+      )
+      /*    responseList.updateResponse = responseList.updateResponse.reduce(
+        (acc: UpdateResponse[], curr) => {
+          if (curr.error !== 429) {
+            acc.push(curr)
+          }
+
+          return acc
+        },
+        []
+      ) */
+      responseManager.errors429 = []
+
+      // eslint-disable-next-line no-console
+      console.log(
+        'UpdateResponse despues de la limpieza',
+        responseManager.updateResponse
+      )
+
+      await Promise.all(
         retryList.map(async (item) => {
           return getProduct(item)
         })
       )
 
-      return operationRetry(retryOperation)
+      return myOperations()
     }
 
     return true
   }
 
-  function addResponsesSuccessfulUpdates(updateResponseList: any[]): void {
-    for (const index in updateResponseList) {
-      const updateResponse = updateResponseList[index]
+  async function myOperations(): Promise<void> {
+    await retryCall()
+  }
 
-      if (updateResponse.error !== 429) {
-        responseList.push(updateResponse)
+  try {
+    await Promise.all(
+      validatedBody.map(async (request) => {
+        return getProduct(request)
+      })
+    )
+    await myOperations()
+
+    if (responseManager.updateResponse.length >= 1) {
+      ctx.status = 400
+      ctx.body = {
+        failedResponses: {
+          elements: responseManager.updateResponse,
+          quantity: responseManager.updateResponse.length,
+        },
       }
+
+      return
     }
+
+    // eslint-disable-next-line no-console
+    console.log('updateResponse', responseManager.updateResponse)
+    // eslint-disable-next-line no-console
+    console.log('responseProduct', responseManager.responseProduct)
+    // eslint-disable-next-line no-console
+    console.log('errors429', responseManager.errors429)
+    ctx.state.products = responseManager.responseProduct
+    await next()
+  } catch (error) {
+    ctx.status = 500
+    ctx.body = error
   }
 }

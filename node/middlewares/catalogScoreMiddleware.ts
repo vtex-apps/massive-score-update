@@ -1,5 +1,3 @@
-import type { ResponseCategory } from '../clients/scoreRestClient'
-
 export async function catalogScoreMiddleware(
   ctx: Context,
   next: () => Promise<any>
@@ -9,56 +7,18 @@ export async function catalogScoreMiddleware(
     clients: { scoreRestClient },
   } = ctx
 
-  const responseList: UpdateResponse[] = []
-
-  const categoriesFound: ResponseCategory[] = catalogs
-
-  try {
-    const expected = await operationRetry(
-      await Promise.all(
-        validatedBody.map(async (arg) => {
-          return updateScore(arg)
-        })
-      )
-    )
-
-    if (expected) {
-      const successfulResponses: UpdateResponse[] = responseList.filter((e) => {
-        return e.success !== 'false'
-      })
-
-      const failedResponses: UpdateResponse[] = responseList.filter((e) => {
-        return e.success === 'false'
-      })
-
-      ctx.status = 200
-      ctx.body = {
-        successfulResponses: {
-          elements: successfulResponses,
-          quantity: successfulResponses.length,
-        },
-        failedResponses: {
-          elements: failedResponses,
-          quantity: failedResponses.length,
-        },
-        total: responseList.length,
-      }
-
-      await next()
-    }
-  } catch (error) {
-    ctx.status = 500
-    ctx.body = error
-    await next()
+  const responseManager: ResponseManager = {
+    updateResponse: [],
+    responseProduct: [],
+    responseCategory: catalogs,
+    errors429: [],
   }
 
-  async function updateScore(
-    updateRequest: UpdateRequest
-  ): Promise<UpdateResponse> {
+  async function updateScore(updateRequest: BodyRequest): Promise<void> {
     const { id, score } = updateRequest
 
     try {
-      const category = categoriesFound.find((p) => {
+      const category = responseManager.responseCategory.find((p) => {
         return p.Id === id
       })
 
@@ -66,13 +26,13 @@ export async function catalogScoreMiddleware(
         const scoreGraphQLClientResponse =
           await scoreRestClient.catalogScoreUpdate(category, score)
 
-        const productMiddlewareResponse: UpdateResponse = {
+        const categoryMiddlewareResponse: BodyResponse = {
           id: scoreGraphQLClientResponse.Id,
           score: scoreGraphQLClientResponse.Score,
           success: 'true',
         }
 
-        return productMiddlewareResponse
+        responseManager.updateResponse.push(categoryMiddlewareResponse)
       }
 
       throw new Error('404')
@@ -90,79 +50,105 @@ export async function catalogScoreMiddleware(
         updateScoreRestClientErrorResponse.errorMessage = error.response
           ? error.response.headers['ratelimit-reset']
           : ''
+
+        responseManager.errors429.push(updateScoreRestClientErrorResponse)
       }
 
-      return updateScoreRestClientErrorResponse
+      responseManager.updateResponse.push(updateScoreRestClientErrorResponse)
     }
   }
 
-  async function operationRetry(
-    updateResponseList: UpdateResponse[]
-  ): Promise<any> {
-    addResponsesSuccessfulUpdates(updateResponseList)
-
-    const response = await findStoppedRequests(updateResponseList)
-
-    return response
+  async function myOperations(): Promise<void> {
+    await retryCall()
   }
 
-  async function findStoppedRequests(
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    responseList: UpdateResponse[]
-  ): Promise<any> {
-    const retryList: UpdateRequest[] = []
+  async function retryCall() {
+    const retryList: BodyRequest[] = []
     let value = '0'
 
-    if (responseList.length >= 1) {
-      for (const index in responseList) {
-        const response = responseList[index]
+    if (responseManager.errors429.length >= 1) {
+      for (const index in responseManager.errors429) {
+        const response = responseManager.errors429[index]
 
-        if (response.error && response.error === 429) {
-          if (response.errorMessage && response.errorMessage > value) {
-            value = response.errorMessage
-          }
-
-          if (value === '0') {
-            value = '20'
-          }
-
-          retryList.push({
-            id: response.id,
-            score: response.score,
-          })
+        if (response.errorMessage && response.errorMessage > value) {
+          value = response.errorMessage
         }
+
+        if (value === '0') {
+          value = '20'
+        }
+
+        retryList.push({
+          id: response.id,
+          score: response.score,
+        })
       }
     }
 
     if (retryList.length >= 1) {
-      let retryOperation: UpdateResponse[] = []
-
       const awaitTimeout = (delay: string) =>
         new Promise((resolve) => setTimeout(resolve, parseFloat(delay) * 1000))
 
       await awaitTimeout(value)
 
-      retryOperation = await Promise.all(
+      // eslint-disable-next-line no-console
+      console.log(
+        'UpdateResponse antes de la limpieza',
+        responseManager.updateResponse
+      )
+
+      responseManager.errors429 = []
+
+      // eslint-disable-next-line no-console
+      console.log(
+        'UpdateResponse despues de la limpieza',
+        responseManager.updateResponse
+      )
+      await Promise.all(
         retryList.map(async (item) => {
           return updateScore(item)
         })
       )
 
-      return operationRetry(retryOperation)
+      return myOperations()
     }
 
     return true
   }
 
-  function addResponsesSuccessfulUpdates(
-    updateResponseList: UpdateResponse[]
-  ): void {
-    for (const index in updateResponseList) {
-      const updateResponse = updateResponseList[index]
+  try {
+    await Promise.all(
+      validatedBody.map(async (arg) => {
+        return updateScore(arg)
+      })
+    )
+    await myOperations()
 
-      if (updateResponse.error !== 429) {
-        responseList.push(updateResponse)
-      }
+    const successfulResponses = responseManager.updateResponse.filter((e) => {
+      return e.success !== 'false'
+    })
+
+    const failedResponses = responseManager.updateResponse.filter((e) => {
+      return e.success === 'false'
+    })
+
+    ctx.status = 200
+    ctx.body = {
+      successfulResponses: {
+        elements: successfulResponses,
+        quantity: successfulResponses.length,
+      },
+      failedResponses: {
+        elements: failedResponses,
+        quantity: failedResponses.length,
+      },
+      total: responseManager.updateResponse.length,
     }
+
+    await next()
+  } catch (error) {
+    ctx.status = 500
+    ctx.body = error
+    await next()
   }
 }

@@ -7,25 +7,23 @@ import { getProductMiddleware } from './middlewares/getProductMiddleware'
 import { getCatalogMiddleware } from './middlewares/getCatalogMiddleware'
 import { validateMiddleware } from './middlewares/validateMiddleware'
 import { catalogScoreMiddleware } from './middlewares/catalogScoreMiddleware'
+import type {
+  ResponseCategory,
+  ResponseProduct,
+} from './clients/scoreRestClient'
 
 const TIMEOUT_MS = 600000
 
-// Create a LRU memory cache for the Status client.
-// The @vtex/api HttpClient respects Cache-Control headers and uses the provided cache.
-const memoryCache = new LRUCache<string, any>({ max: 5000 })
+const memoryCache = new LRUCache<string, any>({ max: 1 })
 
 metrics.trackCache('status', memoryCache)
 
-// This is the configuration for clients available in `ctx.clients`.
 const clients: ClientsConfig<Clients> = {
-  // We pass our custom implementation of the clients bag, containing the Status client.
   implementation: Clients,
   options: {
-    // All IO Clients will be initialized with these options, unless otherwise specified.
     default: {
       timeout: TIMEOUT_MS,
     },
-    // This key will be merged with the default options and add this cache to our Status client.
     status: {
       memoryCache,
     },
@@ -33,31 +31,35 @@ const clients: ClientsConfig<Clients> = {
 }
 
 declare global {
-  // We declare a global Context type just to avoid re-writing ServiceContext<Clients, State> in every handler and resolver
   type Context = ServiceContext<Clients, State>
 
-  // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
   interface State extends RecorderState {
-    validatedBody: UpdateRequest[]
-    products: any
+    validatedBody: BodyRequest[]
+    products: ResponseProduct[]
     catalogs: any
   }
 
-  interface UpdateRequest {
+  interface BodyRequest {
     id: number
     score: number
   }
 
-  interface UpdateResponse {
+  interface BodyResponse {
     id: number
     score: number
     success: string
     error?: number
     errorMessage?: string
   }
+
+  interface ResponseManager {
+    updateResponse: BodyResponse[]
+    responseProduct: ResponseProduct[]
+    responseCategory: ResponseCategory[]
+    errors429: BodyResponse[]
+  }
 }
 
-// Export a service that defines route handlers and client options.
 export default new Service({
   clients,
   routes: {

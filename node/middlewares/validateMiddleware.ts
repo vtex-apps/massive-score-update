@@ -3,13 +3,14 @@ import { UserInputError } from '@vtex/api'
 
 export async function validateMiddleware(
   ctx: Context,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   next: () => Promise<any>
 ) {
   const requestList = await json(ctx.req)
-  const errorList: any[] = []
+  const errorList: BodyResponse[][] = []
 
-  function requestValidator(request: UpdateRequest): void {
-    const requestErrorList: UpdateResponse[] = []
+  function requestValidator(request: BodyRequest): void {
+    const requestErrorList: BodyResponse[] = []
 
     const { id, score } = request
 
@@ -32,8 +33,8 @@ export async function validateMiddleware(
     function errorResponseGenerator(
       field: string,
       option: number
-    ): UpdateResponse {
-      const response: UpdateResponse = {
+    ): BodyResponse {
+      const response: BodyResponse = {
         id,
         score,
         success: 'false',
@@ -46,7 +47,7 @@ export async function validateMiddleware(
         return response
       }
 
-      response.errorMessage = `The request is invalid: field ${field}' must be a number.`
+      response.errorMessage = `The request is invalid: field '${field}' must be a number.`
 
       return response
     }
