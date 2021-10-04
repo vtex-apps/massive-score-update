@@ -1,7 +1,14 @@
-import type { ResponseProduct } from '../clients/scoreRestClient'
+import type {
+  BodyRequest,
+  BodyResponse,
+  ResponseManager,
+  ResponseProduct,
+} from '../interfaces'
+import { buildErrorResponse, buildErrorServiceResponse } from './utils'
 
 export async function getProductMiddleware(
   ctx: Context,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   next: () => Promise<any>
 ) {
   // eslint-disable-next-line no-console
@@ -46,7 +53,7 @@ export async function getProductMiddleware(
     }
   }
 
-  async function retryCall() {
+  async function retryCall(): Promise<true | void> {
     const retryList: BodyRequest[] = []
     let value = '0'
 
@@ -120,19 +127,14 @@ export async function getProductMiddleware(
         return getProduct(request)
       })
     )
-    await myOperations()
 
     if (responseManager.updateResponse.length >= 1) {
-      ctx.status = 400
-      ctx.body = {
-        failedResponses: {
-          elements: responseManager.updateResponse,
-          quantity: responseManager.updateResponse.length,
-        },
-      }
+      buildErrorResponse(responseManager, ctx)
 
       return
     }
+
+    await myOperations()
 
     // eslint-disable-next-line no-console
     console.log('updateResponse', responseManager.updateResponse)
@@ -143,7 +145,6 @@ export async function getProductMiddleware(
     ctx.state.products = responseManager.responseProduct
     await next()
   } catch (error) {
-    ctx.status = 500
-    ctx.body = error
+    buildErrorServiceResponse(error, ctx)
   }
 }

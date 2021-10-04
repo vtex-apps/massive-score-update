@@ -1,4 +1,10 @@
-import type { ResponseCategory } from '../clients/scoreRestClient'
+import type {
+  BodyRequest,
+  BodyResponse,
+  ResponseCategory,
+  ResponseManager,
+} from '../interfaces'
+import { buildErrorResponse, buildErrorServiceResponse } from './utils'
 
 export async function getCatalogMiddleware(
   ctx: Context,
@@ -49,7 +55,7 @@ export async function getCatalogMiddleware(
     await retryCall()
   }
 
-  async function retryCall() {
+  async function retryCall(): Promise<true | void> {
     const retryList: BodyRequest[] = []
     let value = '0'
 
@@ -113,13 +119,7 @@ export async function getCatalogMiddleware(
     await myOperations()
 
     if (responseManager.updateResponse.length >= 1) {
-      ctx.status = 404
-      ctx.body = {
-        failedResponses: {
-          elements: responseManager.updateResponse,
-          quantity: responseManager.updateResponse.length,
-        },
-      }
+      buildErrorResponse(responseManager, ctx)
 
       return
     }
@@ -127,7 +127,6 @@ export async function getCatalogMiddleware(
     ctx.state.catalogs = responseManager.responseCategory
     await next()
   } catch (error) {
-    ctx.status = 500
-    ctx.body = error
+    buildErrorServiceResponse(error, ctx)
   }
 }

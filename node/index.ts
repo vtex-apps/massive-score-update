@@ -8,9 +8,10 @@ import { getCatalogMiddleware } from './middlewares/getCatalogMiddleware'
 import { validateMiddleware } from './middlewares/validateMiddleware'
 import { catalogScoreMiddleware } from './middlewares/catalogScoreMiddleware'
 import type {
+  BodyRequest,
   ResponseCategory,
   ResponseProduct,
-} from './clients/scoreRestClient'
+} from './interfaces'
 
 const TIMEOUT_MS = 600000
 
@@ -36,27 +37,7 @@ declare global {
   interface State extends RecorderState {
     validatedBody: BodyRequest[]
     products: ResponseProduct[]
-    catalogs: any
-  }
-
-  interface BodyRequest {
-    id: number
-    score: number
-  }
-
-  interface BodyResponse {
-    id: number
-    score: number
-    success: string
-    error?: number
-    errorMessage?: string
-  }
-
-  interface ResponseManager {
-    updateResponse: BodyResponse[]
-    responseProduct: ResponseProduct[]
-    responseCategory: ResponseCategory[]
-    errors429: BodyResponse[]
+    catalogs: ResponseCategory[]
   }
 }
 

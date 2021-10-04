@@ -1,6 +1,8 @@
 import { json } from 'co-body'
 import { UserInputError } from '@vtex/api'
 
+import type { BodyRequest, BodyResponse } from '../interfaces'
+
 export async function validateMiddleware(
   ctx: Context,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

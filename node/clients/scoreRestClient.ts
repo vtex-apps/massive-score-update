@@ -1,6 +1,12 @@
 import type { InstanceOptions, IOContext } from '@vtex/api'
 import { JanusClient } from '@vtex/api'
 
+import type {
+  ResponseCategory,
+  ResponseProduct,
+  ScoreUpdateResponse,
+} from '../interfaces'
+
 export default class ScoreRestClient extends JanusClient {
   constructor(context: IOContext, options?: InstanceOptions) {
     super(context, {
@@ -87,52 +93,4 @@ export default class ScoreRestClient extends JanusClient {
       `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${productId}`
     )
   }
-}
-export interface ScoreUpdateResponse {
-  Id: number
-  Score: number
-}
-
-export interface ResponseCategory {
-  Id: number
-  Name: string
-  FatherCategoryId: number
-  Title: string
-  Description: string
-  Keywords: string
-  IsActive: boolean
-  LomadeeCampaignCode: string
-  AdWordsRemarketingCode: string
-  ShowInStoreFront: boolean
-  ShowBrandFilter: boolean
-  ActiveStoreFrontLink: boolean
-  GlobalCategoryId: number
-  StockKeepingUnitSelectionMode: string
-  Score: number
-  LinkId: string
-  HasChildren: boolean
-}
-
-export interface ResponseProduct {
-  Id: number
-  Name: string
-  DepartmentId: number
-  CategoryId: number
-  BrandId: number
-  LinkId: string
-  RefId: string
-  IsVisible: boolean
-  Description: string
-  DescriptionShort: string
-  ReleaseDate: string
-  KeyWords: string
-  Title: string
-  IsActive: boolean
-  TaxCode: string
-  MetaTagDescription: string
-  SupplierId: number
-  ShowWithoutStock: boolean
-  AdWordsRemarketingCode: string
-  LomadeeCampaignCode: string
-  Score: number
 }

@@ -1,5 +1,9 @@
+import type { BodyResponse, ResponseManager } from '../interfaces'
+import { buildErrorServiceResponse, buildResponse } from './utils'
+
 export async function catalogScoreMiddleware(
   ctx: Context,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   next: () => Promise<any>
 ) {
   const {
@@ -14,9 +18,7 @@ export async function catalogScoreMiddleware(
     errors429: [],
   }
 
-  async function updateScore(updateRequest: BodyRequest): Promise<void> {
-    const { id, score } = updateRequest
-
+  async function updateScore(id: number, score: number): Promise<void> {
     try {
       const category = responseManager.responseCategory.find((p) => {
         return p.Id === id
@@ -63,12 +65,12 @@ export async function catalogScoreMiddleware(
   }
 
   async function retryCall() {
-    const retryList: BodyRequest[] = []
-    let value = '0'
-
     if (responseManager.errors429.length >= 1) {
-      for (const index in responseManager.errors429) {
-        const response = responseManager.errors429[index]
+      const retryList = responseManager.errors429
+      let value = '0'
+
+      for (const index in retryList) {
+        const response = retryList[index]
 
         if (response.errorMessage && response.errorMessage > value) {
           value = response.errorMessage
@@ -77,15 +79,8 @@ export async function catalogScoreMiddleware(
         if (value === '0') {
           value = '20'
         }
-
-        retryList.push({
-          id: response.id,
-          score: response.score,
-        })
       }
-    }
 
-    if (retryList.length >= 1) {
       const awaitTimeout = (delay: string) =>
         new Promise((resolve) => setTimeout(resolve, parseFloat(delay) * 1000))
 
@@ -106,7 +101,9 @@ export async function catalogScoreMiddleware(
       )
       await Promise.all(
         retryList.map(async (item) => {
-          return updateScore(item)
+          const { id, score } = item
+
+          return updateScore(id, score)
         })
       )
 
@@ -119,36 +116,18 @@ export async function catalogScoreMiddleware(
   try {
     await Promise.all(
       validatedBody.map(async (arg) => {
-        return updateScore(arg)
+        const { id, score } = arg
+
+        return updateScore(id, score)
       })
     )
     await myOperations()
 
-    const successfulResponses = responseManager.updateResponse.filter((e) => {
-      return e.success !== 'false'
-    })
-
-    const failedResponses = responseManager.updateResponse.filter((e) => {
-      return e.success === 'false'
-    })
-
-    ctx.status = 200
-    ctx.body = {
-      successfulResponses: {
-        elements: successfulResponses,
-        quantity: successfulResponses.length,
-      },
-      failedResponses: {
-        elements: failedResponses,
-        quantity: failedResponses.length,
-      },
-      total: responseManager.updateResponse.length,
-    }
+    buildResponse(responseManager, ctx)
 
     await next()
   } catch (error) {
-    ctx.status = 500
-    ctx.body = error
+    buildErrorServiceResponse(error, ctx)
     await next()
   }
 }
