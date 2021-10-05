@@ -1,26 +1,20 @@
 import { json } from 'co-body'
 import { UserInputError } from '@vtex/api'
 
-import type { BodyRequest, BodyResponse } from '../interfaces'
-import { ResponseManager } from "../interfaces";
+import type { BodyRequest, BodyResponse, ResponseManager } from '../interfaces'
+import { buildBadRequest } from './utils'
 
 export async function validateMiddleware(
   ctx: Context,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   next: () => Promise<any>
 ) {
-  console.log("-------------------------------------------------------------")
-
   const responseManager: ResponseManager = {
     updateResponse: [],
     responseProduct: [],
     responseCategory: [],
-    errors429: []
+    errors429: [],
   }
-
-  console.log('asdasdasd')
-
-  console.log("responseManager", responseManager)
 
   const requestList = await json(ctx.req)
   const errorList: BodyResponse[][] = []
@@ -31,41 +25,19 @@ export async function validateMiddleware(
     const { id, score } = request
 
     if (!id) {
-      requestErrorList.push(errorResponseGenerator('id', 1))
+      requestErrorList.push(buildBadRequest(id, score, 'id', 1))
     } else if (!(typeof id === 'number')) {
-      requestErrorList.push(errorResponseGenerator('id', 2))
+      requestErrorList.push(buildBadRequest(id, score, 'id', 2))
     }
 
     if (!score) {
-      requestErrorList.push(errorResponseGenerator('score', 1))
+      requestErrorList.push(buildBadRequest(id, score, 'score', 1))
     } else if (!(typeof score === 'number')) {
-      requestErrorList.push(errorResponseGenerator('score', 2))
+      requestErrorList.push(buildBadRequest(id, score, 'score', 2))
     }
 
     if (requestErrorList.length >= 1) {
       errorList.push(requestErrorList)
-    }
-
-    function errorResponseGenerator(
-      field: string,
-      option: number
-    ): BodyResponse {
-      const response: BodyResponse = {
-        id,
-        score,
-        success: 'false',
-        error: 400,
-      }
-
-      if (option === 1) {
-        response.errorMessage = `The request is invalid: The '${field}' field is required.`
-
-        return response
-      }
-
-      response.errorMessage = `The request is invalid: field '${field}' must be a number.`
-
-      return response
     }
   }
 

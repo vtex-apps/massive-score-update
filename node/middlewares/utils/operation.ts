@@ -1,51 +1,60 @@
-import { BodyResponse, ResponseCategory, ResponseProduct, ResponseManager } from "../../interfaces";
+import type {
+  BodyResponse,
+  ResponseCategory,
+  ResponseProduct,
+  ResponseManager,
+} from '../../interfaces'
 
 export const operation = async (
   ctx: Context,
   responseManager: ResponseManager,
   id: number,
   score: number,
-  operation: string
+  task: string
+  // eslint-disable-next-line max-params
 ): Promise<void> => {
   try {
-  const { clients:{
-    scoreRestClient
-  }} = ctx
+    const {
+      clients: { scoreRestClient },
+    } = ctx
 
-    if(operation === "getProduct"){
+    if (task === 'getProduct') {
       const product: ResponseProduct = await scoreRestClient.getProduct(id)
-      responseManager.responseProduct.push(product)
 
+      responseManager.responseProduct.push(product)
     }
 
-    if(operation === 'getCategory'){
+    if (task === 'getCategory') {
       const catalog: ResponseCategory = await scoreRestClient.getCategory(id)
+
       responseManager.responseCategory.push(catalog)
     }
 
-    if(operation === 'updateCategory'){
-      const category = responseManager.responseCategory.find(
-        (category: ResponseCategory) => category.Id === id)
+    if (task === 'updateCategory') {
+      const catalog = responseManager.responseCategory.find(
+        (category: ResponseCategory) => category.Id === id
+      )
 
-      if(category){
+      if (catalog) {
         const scoreGraphQLClientResponse =
-          await scoreRestClient.catalogScoreUpdate(category, score)
+          await scoreRestClient.catalogScoreUpdate(catalog, score)
 
         const categoryMiddlewareResponse: BodyResponse = {
           id: scoreGraphQLClientResponse.Id,
           score: scoreGraphQLClientResponse.Score,
           success: 'true',
         }
-        responseManager.updateResponse.push(categoryMiddlewareResponse)
 
+        responseManager.updateResponse.push(categoryMiddlewareResponse)
       } else {
         throw new Error('404')
       }
     }
 
-    if(operation === 'updateProduct'){
+    if (task === 'updateProduct') {
       const product = responseManager.responseProduct.find(
-        (product: ResponseProduct) => product.Id === id)
+        (elem: ResponseProduct) => elem.Id === id
+      )
 
       if (product) {
         const scoreGraphQLClientResponse =

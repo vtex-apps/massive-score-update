@@ -1,6 +1,8 @@
+export { buildBadRequest } from './responseBuilder'
+
 export { sleep } from './sleep'
 
-export { getTimeOutDefault } from './getTimeOutDefault'
+export { setTimeOutValue } from './setTimeOutValue'
 
 export { retryCall } from './retryCall'
 

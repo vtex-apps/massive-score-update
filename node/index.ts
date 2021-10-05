@@ -7,15 +7,12 @@ import { getProductMiddleware } from './middlewares/getProductMiddleware'
 import { getCatalogMiddleware } from './middlewares/getCatalogMiddleware'
 import { validateMiddleware } from './middlewares/validateMiddleware'
 import { catalogScoreMiddleware } from './middlewares/catalogScoreMiddleware'
-import type {
-  BodyRequest,
-} from './interfaces'
-import { ResponseManager } from "./interfaces";
+import type { BodyRequest, ResponseManager } from './interfaces'
 
 const TIMEOUT_MS = 600000
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const memoryCache = new LRUCache<string, any>({ max: 1 })
+const memoryCache = new LRUCache<string, any>({ max: 5000 })
 
 metrics.trackCache('status', memoryCache)
 
@@ -34,10 +31,9 @@ const clients: ClientsConfig<Clients> = {
 declare global {
   type Context = ServiceContext<Clients, State>
 
-  interface State extends RecorderState{
+  interface State extends RecorderState {
     responseManager: ResponseManager
     validatedBody: BodyRequest[]
-
   }
 }
 

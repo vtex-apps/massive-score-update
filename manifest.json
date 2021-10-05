@@ -16,9 +16,7 @@
       "url": "https://support.vtex.com/hc/requests"
     },
     "type": "free",
-    "availableCountries": [
-      "*"
-    ]
+    "availableCountries": ["*"]
   },
   "scripts": {
     "prereleasy": "bash lint.sh"
@@ -57,8 +55,9 @@
     "type": "object",
     "properties": {
       "timeOutDefault": {
-        "title": "Default time out",
-        "type": "string"
+        "title": "Retry Timeout",
+        "type": "string",
+        "description": "Mass retry timeout configuration. Default value set to 20 seconds."
       }
     }
   },

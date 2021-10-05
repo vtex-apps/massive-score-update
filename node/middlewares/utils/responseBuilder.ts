@@ -1,4 +1,4 @@
-import type { ResponseManager } from '../../interfaces'
+import type { BodyResponse, ResponseManager } from '../../interfaces'
 
 export const buildResponse = (
   responseManager: ResponseManager,
@@ -49,4 +49,29 @@ export const buildServiceErrorResponse = (
 ): void => {
   ctx.status = 500
   ctx.body = error
+}
+
+export const buildBadRequest = (
+  id: number,
+  score: number,
+  field: string,
+  option: number
+  // eslint-disable-next-line max-params
+): BodyResponse => {
+  const response: BodyResponse = {
+    id,
+    score,
+    success: 'false',
+    error: 400,
+  }
+
+  if (option === 1) {
+    response.errorMessage = `The request is invalid: The '${field}' field is required.`
+
+    return response
+  }
+
+  response.errorMessage = `The request is invalid: field '${field}' must be a number.`
+
+  return response
 }

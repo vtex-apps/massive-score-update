@@ -1,8 +1,9 @@
 import {
   buildServiceErrorResponse,
   buildResponse,
-   retryCall, operation
-} from "./utils";
+  retryCall,
+  operation,
+} from './utils'
 
 export async function productScoreMiddleware(
   ctx: Context,
@@ -10,16 +11,20 @@ export async function productScoreMiddleware(
   next: () => Promise<any>
 ) {
   const {
-    state: { responseManager : manager, validatedBody },
-
+    state: { responseManager: manager, validatedBody },
   } = ctx
 
   const responseManager = manager
 
   async function myOperations(): Promise<void> {
-    await retryCall(ctx, responseManager, operation, myOperations,'updateProduct')
+    await retryCall(
+      ctx,
+      responseManager,
+      operation,
+      myOperations,
+      'updateProduct'
+    )
   }
-
 
   try {
     await Promise.all(
@@ -36,7 +41,6 @@ export async function productScoreMiddleware(
 
     await next()
   } catch (error) {
-    console.log('mierror', error)
     buildServiceErrorResponse(error, ctx)
     await next()
   }

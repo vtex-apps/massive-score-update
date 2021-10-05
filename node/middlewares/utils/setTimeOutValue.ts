@@ -1,4 +1,4 @@
-export const getTimeOutDefault = async (
+export const setTimeOutValue = async (
   ctx: Context,
   value: string
 ): Promise<string> => {

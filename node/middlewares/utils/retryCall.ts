@@ -1,18 +1,20 @@
-import { getTimeOutDefault } from "./getTimeOutDefault";
-import { sleep } from "./sleep";
+import type { ResponseManager } from '../../interfaces'
+import { setTimeOutValue } from './setTimeOutValue'
+import { sleep } from './sleep'
 
 export const retryCall = async (
   ctx: Context,
-  responseManager: any,
+  responseManager: ResponseManager,
   productOperation: (
     ctx: Context,
-    responseManager: any,
+    responseManager: ResponseManager,
     id: number,
     score: number,
     operation: string
-  )=>any,
-  retry: ()=>any,
+  ) => Promise<void>,
+  retry: () => Promise<true | void>,
   operationType: string
+  // eslint-disable-next-line max-params
 ): Promise<true | void> => {
   if (responseManager.errors429.length >= 1) {
     let value = '0'
@@ -28,7 +30,7 @@ export const retryCall = async (
     }
 
     if (value === '0') {
-      value = await getTimeOutDefault(ctx, value)
+      value = await setTimeOutValue(ctx, value)
     }
 
     await sleep(value)
@@ -36,7 +38,7 @@ export const retryCall = async (
     responseManager.errors429 = []
 
     await Promise.all(
-      retryList.map(async (item: { id: number, score: number }) => {
+      retryList.map(async (item: { id: number; score: number }) => {
         const { id, score } = item
 
         return productOperation(ctx, responseManager, id, score, operationType)

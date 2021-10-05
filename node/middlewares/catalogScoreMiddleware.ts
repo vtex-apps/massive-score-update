@@ -1,8 +1,9 @@
 import {
   buildServiceErrorResponse,
   buildResponse,
-  retryCall, operation
-} from "./utils";
+  retryCall,
+  operation,
+} from './utils'
 
 export async function catalogScoreMiddleware(
   ctx: Context,
@@ -10,13 +11,19 @@ export async function catalogScoreMiddleware(
   next: () => Promise<any>
 ) {
   const {
-    state: { responseManager : manager, validatedBody },
+    state: { responseManager: manager, validatedBody },
   } = ctx
+
   const responseManager = manager
 
-
   async function myOperations(): Promise<void> {
-    await retryCall(ctx, responseManager, operation, myOperations,'updateCategory')
+    await retryCall(
+      ctx,
+      responseManager,
+      operation,
+      myOperations,
+      'updateCategory'
+    )
   }
 
   try {
