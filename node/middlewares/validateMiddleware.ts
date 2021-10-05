@@ -2,12 +2,26 @@ import { json } from 'co-body'
 import { UserInputError } from '@vtex/api'
 
 import type { BodyRequest, BodyResponse } from '../interfaces'
+import { ResponseManager } from "../interfaces";
 
 export async function validateMiddleware(
   ctx: Context,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   next: () => Promise<any>
 ) {
+  console.log("-------------------------------------------------------------")
+
+  const responseManager: ResponseManager = {
+    updateResponse: [],
+    responseProduct: [],
+    responseCategory: [],
+    errors429: []
+  }
+
+  console.log('asdasdasd')
+
+  console.log("responseManager", responseManager)
+
   const requestList = await json(ctx.req)
   const errorList: BodyResponse[][] = []
 
@@ -76,6 +90,7 @@ export async function validateMiddleware(
   }
 
   ctx.state.validatedBody = requestList
+  ctx.state.responseManager = responseManager
 
   await next()
 }

@@ -9,9 +9,8 @@ import { validateMiddleware } from './middlewares/validateMiddleware'
 import { catalogScoreMiddleware } from './middlewares/catalogScoreMiddleware'
 import type {
   BodyRequest,
-  ResponseCategory,
-  ResponseProduct,
 } from './interfaces'
+import { ResponseManager } from "./interfaces";
 
 const TIMEOUT_MS = 600000
 
@@ -35,10 +34,10 @@ const clients: ClientsConfig<Clients> = {
 declare global {
   type Context = ServiceContext<Clients, State>
 
-  interface State extends RecorderState {
+  interface State extends RecorderState{
+    responseManager: ResponseManager
     validatedBody: BodyRequest[]
-    products: ResponseProduct[]
-    catalogs: ResponseCategory[]
+
   }
 }
 
