@@ -8,11 +8,11 @@
   "routes": {
     "product": {
       "path": "/_v/massive/product/score/update",
-      "public": false
+      "public": true
     },
     "catalog": {
       "path": "/_v/massive/catalog/score/update",
-      "public": false
+      "public": true
     }
   }
 }

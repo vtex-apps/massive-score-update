@@ -1,54 +1,43 @@
 import { json } from 'co-body'
 import { UserInputError } from '@vtex/api'
 
+import type { BodyRequest, BodyResponse, ResponseManager } from '../interfaces'
+import { buildBadRequest } from './utils'
+
 export async function validateMiddleware(
   ctx: Context,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   next: () => Promise<any>
 ) {
-  const requestList = await json(ctx.req)
-  const errorList: any[] = []
+  const responseManager: ResponseManager = {
+    updateResponse: [],
+    responseProduct: [],
+    responseCategory: [],
+    errors429: [],
+  }
 
-  function requestValidator(request: UpdateRequest): void {
-    const requestErrorList: UpdateResponse[] = []
+  const requestList = await json(ctx.req)
+  const errorList: BodyResponse[][] = []
+
+  function requestValidator(request: BodyRequest): void {
+    const requestErrorList: BodyResponse[] = []
 
     const { id, score } = request
 
     if (!id) {
-      requestErrorList.push(errorResponseGenerator('id', 1))
+      requestErrorList.push(buildBadRequest(id, score, 'id', 1))
     } else if (!(typeof id === 'number')) {
-      requestErrorList.push(errorResponseGenerator('id', 2))
+      requestErrorList.push(buildBadRequest(id, score, 'id', 2))
     }
 
     if (!score) {
-      requestErrorList.push(errorResponseGenerator('score', 1))
+      requestErrorList.push(buildBadRequest(id, score, 'score', 1))
     } else if (!(typeof score === 'number')) {
-      requestErrorList.push(errorResponseGenerator('score', 2))
+      requestErrorList.push(buildBadRequest(id, score, 'score', 2))
     }
 
     if (requestErrorList.length >= 1) {
       errorList.push(requestErrorList)
-    }
-
-    function errorResponseGenerator(
-      field: string,
-      option: number
-    ): UpdateResponse {
-      const response: UpdateResponse = {
-        id,
-        score,
-        success: 'false',
-        error: 400,
-      }
-
-      if (option === 1) {
-        response.errorMessage = `The request is invalid: The '${field}' field is required.`
-
-        return response
-      }
-
-      response.errorMessage = `The request is invalid: field ${field}' must be a number.`
-
-      return response
     }
   }
 
@@ -73,6 +62,7 @@ export async function validateMiddleware(
   }
 
   ctx.state.validatedBody = requestList
+  ctx.state.responseManager = responseManager
 
   await next()
 }

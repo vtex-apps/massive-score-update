@@ -1,0 +1,6 @@
+export { ScoreUpdateResponse } from './scoreUpdateResponse'
+export { ResponseProduct } from './responseProduct'
+export { ResponseCategory } from './responseCategory'
+export { BodyRequest } from './bodyRequest'
+export { BodyResponse } from './bodyResponse'
+export { ResponseManager } from './responseManager'
