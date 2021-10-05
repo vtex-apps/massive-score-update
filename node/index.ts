@@ -15,6 +15,7 @@ import type {
 
 const TIMEOUT_MS = 600000
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const memoryCache = new LRUCache<string, any>({ max: 1 })
 
 metrics.trackCache('status', memoryCache)

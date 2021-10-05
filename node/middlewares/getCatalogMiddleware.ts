@@ -1,10 +1,14 @@
 import type {
-  BodyRequest,
   BodyResponse,
   ResponseCategory,
   ResponseManager,
 } from '../interfaces'
-import { buildErrorResponse, buildErrorServiceResponse } from './utils'
+import {
+  buildErrorResponse,
+  buildServiceErrorResponse,
+  getTimeOutDefault,
+  sleep,
+} from './utils'
 
 export async function getCatalogMiddleware(
   ctx: Context,
@@ -23,9 +27,7 @@ export async function getCatalogMiddleware(
     errors429: [],
   }
 
-  async function getCategory(updateRequest: BodyRequest): Promise<void> {
-    const { id, score } = updateRequest
-
+  async function getCategory(id: number, score: number): Promise<void> {
     try {
       const category: ResponseCategory = await scoreRestClient.getCategory(id)
 
@@ -43,7 +45,7 @@ export async function getCatalogMiddleware(
       if (error.response && error.response.status === 429) {
         categoryRestClientErrorResponse.errorMessage = error.response
           ? error.response.headers['ratelimit-reset']
-          : ''
+          : '0'
         responseManager.errors429.push(categoryRestClientErrorResponse)
       }
 
@@ -56,51 +58,31 @@ export async function getCatalogMiddleware(
   }
 
   async function retryCall(): Promise<true | void> {
-    const retryList: BodyRequest[] = []
-    let value = '0'
-
     if (responseManager.errors429.length >= 1) {
+      let value = '0'
+      const retryList = responseManager.errors429
+
       for (const index in responseManager.errors429) {
         const response = responseManager.errors429[index]
 
         if (response.errorMessage && response.errorMessage > value) {
           value = response.errorMessage
         }
-
-        if (value === '0') {
-          value = '20'
-        }
-
-        retryList.push({
-          id: response.id,
-          score: response.score,
-        })
       }
-    }
 
-    if (retryList.length >= 1) {
-      const awaitTimeout = (delay: string) =>
-        new Promise((resolve) => setTimeout(resolve, parseFloat(delay) * 1000))
+      if (value === '0') {
+        value = await getTimeOutDefault(ctx, value)
+      }
 
-      await awaitTimeout(value)
-
-      // eslint-disable-next-line no-console
-      console.log(
-        'UpdateResponse antes de la limpieza',
-        responseManager.updateResponse
-      )
+      await sleep(value)
 
       responseManager.errors429 = []
 
-      // eslint-disable-next-line no-console
-      console.log(
-        'UpdateResponse despues de la limpieza',
-        responseManager.updateResponse
-      )
-
       await Promise.all(
-        retryList.map(async (item) => {
-          return getCategory(item)
+        retryList.map(async (elem) => {
+          const { id, score } = elem
+
+          return getCategory(id, score)
         })
       )
 
@@ -112,11 +94,12 @@ export async function getCatalogMiddleware(
 
   try {
     await Promise.all(
-      validatedBody.map(async (arg) => {
-        return getCategory(arg)
+      validatedBody.map(async (elem) => {
+        const { id, score } = elem
+
+        return getCategory(id, score)
       })
     )
-    await myOperations()
 
     if (responseManager.updateResponse.length >= 1) {
       buildErrorResponse(responseManager, ctx)
@@ -124,9 +107,11 @@ export async function getCatalogMiddleware(
       return
     }
 
+    await myOperations()
+
     ctx.state.catalogs = responseManager.responseCategory
     await next()
   } catch (error) {
-    buildErrorServiceResponse(error, ctx)
+    buildServiceErrorResponse(error, ctx)
   }
 }

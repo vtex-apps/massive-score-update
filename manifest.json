@@ -50,5 +50,15 @@
       "name": "ProdutoForm.aspx"
     }
   ],
+  "settingsSchema": {
+    "title": "Massive score update",
+    "type": "object",
+    "properties": {
+      "timeOutDefault": {
+        "title": "Default time out",
+        "type": "string"
+      }
+    }
+  },
   "$schema": "https://raw.githubusercontent.com/vtex/node-vtex-api/master/gen/manifest.schema"
 }

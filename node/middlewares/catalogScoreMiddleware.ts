@@ -1,5 +1,10 @@
 import type { BodyResponse, ResponseManager } from '../interfaces'
-import { buildErrorServiceResponse, buildResponse } from './utils'
+import {
+  buildServiceErrorResponse,
+  buildResponse,
+  getTimeOutDefault,
+  sleep,
+} from './utils'
 
 export async function catalogScoreMiddleware(
   ctx: Context,
@@ -35,9 +40,9 @@ export async function catalogScoreMiddleware(
         }
 
         responseManager.updateResponse.push(categoryMiddlewareResponse)
+      } else {
+        throw new Error('404')
       }
-
-      throw new Error('404')
     } catch (error) {
       const data = error.response ? error.response.data : ''
       const updateScoreRestClientErrorResponse = {
@@ -75,30 +80,16 @@ export async function catalogScoreMiddleware(
         if (response.errorMessage && response.errorMessage > value) {
           value = response.errorMessage
         }
-
-        if (value === '0') {
-          value = '20'
-        }
       }
 
-      const awaitTimeout = (delay: string) =>
-        new Promise((resolve) => setTimeout(resolve, parseFloat(delay) * 1000))
+      if (value === '0') {
+        value = await getTimeOutDefault(ctx, value)
+      }
 
-      await awaitTimeout(value)
-
-      // eslint-disable-next-line no-console
-      console.log(
-        'UpdateResponse antes de la limpieza',
-        responseManager.updateResponse
-      )
+      await sleep(value)
 
       responseManager.errors429 = []
 
-      // eslint-disable-next-line no-console
-      console.log(
-        'UpdateResponse despues de la limpieza',
-        responseManager.updateResponse
-      )
       await Promise.all(
         retryList.map(async (item) => {
           const { id, score } = item
@@ -127,7 +118,7 @@ export async function catalogScoreMiddleware(
 
     await next()
   } catch (error) {
-    buildErrorServiceResponse(error, ctx)
+    buildServiceErrorResponse(error, ctx)
     await next()
   }
 }

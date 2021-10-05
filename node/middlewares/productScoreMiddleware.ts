@@ -1,5 +1,10 @@
 import type { BodyResponse, ResponseManager } from '../interfaces'
-import { buildErrorServiceResponse, buildResponse } from './utils'
+import {
+  buildServiceErrorResponse,
+  buildResponse,
+  getTimeOutDefault,
+  sleep,
+} from './utils'
 
 export async function productScoreMiddleware(
   ctx: Context,
@@ -35,23 +40,23 @@ export async function productScoreMiddleware(
         }
 
         responseManager.updateResponse.push(productMiddlewareResponse)
+      } else {
+        throw new Error('404')
       }
-
-      throw new Error('404')
     } catch (error) {
       const data = error.response ? error.response.data : ''
       const updateScoreRestClientErrorResponse = {
         id,
         success: 'false',
         score,
-        error: error.response ? error.response.status : 429,
+        error: error.response ? error.response.status : 500,
         errorMessage: data.error ? data.error.message : data,
       }
 
       if (error.response && error.response.status === 429) {
         updateScoreRestClientErrorResponse.errorMessage = error.response
           ? error.response.headers['ratelimit-reset']
-          : ''
+          : '0'
         responseManager.errors429.push(updateScoreRestClientErrorResponse)
       }
 
@@ -74,30 +79,16 @@ export async function productScoreMiddleware(
         if (response.errorMessage && response.errorMessage > value) {
           value = response.errorMessage
         }
-
-        if (value === '0') {
-          value = '20'
-        }
       }
 
-      const awaitTimeout = (delay: string) =>
-        new Promise((resolve) => setTimeout(resolve, parseFloat(delay) * 1000))
+      if (value === '0') {
+        value = await getTimeOutDefault(ctx, value)
+      }
 
-      await awaitTimeout(value)
-
-      // eslint-disable-next-line no-console
-      console.log(
-        'UpdateResponse antes de la limpieza',
-        responseManager.updateResponse
-      )
+      await sleep(value)
 
       responseManager.errors429 = []
 
-      // eslint-disable-next-line no-console
-      console.log(
-        'UpdateResponse despues de la limpieza',
-        responseManager.updateResponse
-      )
       await Promise.all(
         retryList.map(async (elem) => {
           const { id, score } = elem
@@ -126,7 +117,7 @@ export async function productScoreMiddleware(
 
     await next()
   } catch (error) {
-    buildErrorServiceResponse(error, ctx)
+    buildServiceErrorResponse(error, ctx)
     await next()
   }
 }

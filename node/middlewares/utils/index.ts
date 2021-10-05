@@ -1,5 +1,9 @@
+export { sleep } from './sleep'
+
+export { getTimeOutDefault } from './getTimeOutDefault'
+
 export {
-  buildResponse,
   buildErrorResponse,
-  buildErrorServiceResponse,
+  buildResponse,
+  buildServiceErrorResponse,
 } from './responseBuilder'

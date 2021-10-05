@@ -1,14 +1,16 @@
 import type { ResponseManager } from '../../interfaces'
 
-export function buildResponse(
+export const buildResponse = (
   responseManager: ResponseManager,
   ctx: Context
-): void {
-  const successfulResponses = responseManager.updateResponse.filter((e) => {
+): void => {
+  const { updateResponse } = responseManager
+
+  const successfulResponses = updateResponse.filter((e) => {
     return e.success !== 'false'
   })
 
-  const failedResponses = responseManager.updateResponse.filter((e) => {
+  const failedResponses = updateResponse.filter((e) => {
     return e.success === 'false'
   })
 
@@ -22,24 +24,29 @@ export function buildResponse(
       elements: failedResponses,
       quantity: failedResponses.length,
     },
-    total: responseManager.updateResponse.length,
+    total: updateResponse.length,
   }
 }
 
-export function buildErrorResponse(
+export const buildErrorResponse = (
   responseManager: ResponseManager,
   ctx: Context
-): void {
+): void => {
+  const { updateResponse } = responseManager
+
   ctx.status = 400
   ctx.body = {
     failedResponses: {
-      elements: responseManager.updateResponse,
-      quantity: responseManager.updateResponse.length,
+      elements: updateResponse,
+      quantity: updateResponse.length,
     },
   }
 }
 
-export function buildErrorServiceResponse(error: string, ctx: Context): void {
+export const buildServiceErrorResponse = (
+  error: string,
+  ctx: Context
+): void => {
   ctx.status = 500
   ctx.body = error
 }
