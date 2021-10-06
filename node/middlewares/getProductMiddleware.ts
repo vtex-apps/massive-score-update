@@ -36,7 +36,6 @@ export async function getProductMiddleware(
     }
 
     await myOperations()
-
     ctx.state.responseManager = responseManager
     await next()
   } catch (error) {

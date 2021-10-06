@@ -5,7 +5,7 @@ import { sleep } from './sleep'
 export const retryCall = async (
   ctx: Context,
   responseManager: ResponseManager,
-  productOperation: (
+  operation: (
     ctx: Context,
     responseManager: ResponseManager,
     id: number,
@@ -41,7 +41,7 @@ export const retryCall = async (
       retryList.map(async (item: { id: number; score: number }) => {
         const { id, score } = item
 
-        return productOperation(ctx, responseManager, id, score, operationType)
+        return operation(ctx, responseManager, id, score, operationType)
       })
     )
 
