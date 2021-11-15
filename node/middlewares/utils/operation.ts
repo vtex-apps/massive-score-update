@@ -18,14 +18,22 @@ export const operation = async (
       clients: { scoreRestClient },
     } = ctx
 
+    const vtexIdToken = ctx.get('VtexIdclientAutCookie') ?? ''
+
     if (task === 'getProduct') {
-      const product: ResponseProduct = await scoreRestClient.getProduct(id)
+      const product: ResponseProduct = await scoreRestClient.getProduct(
+        id,
+        vtexIdToken
+      )
 
       responseManager.responseProduct.push(product)
     }
 
     if (task === 'getCategory') {
-      const catalog: ResponseCategory = await scoreRestClient.getCategory(id)
+      const catalog: ResponseCategory = await scoreRestClient.getCategory(
+        id,
+        vtexIdToken
+      )
 
       responseManager.responseCategory.push(catalog)
     }
@@ -37,7 +45,7 @@ export const operation = async (
 
       if (catalog) {
         const scoreGraphQLClientResponse =
-          await scoreRestClient.catalogScoreUpdate(catalog, score)
+          await scoreRestClient.catalogScoreUpdate(catalog, score, vtexIdToken)
 
         const categoryMiddlewareResponse: BodyResponse = {
           id: scoreGraphQLClientResponse.Id,
@@ -58,7 +66,7 @@ export const operation = async (
 
       if (product) {
         const scoreGraphQLClientResponse =
-          await scoreRestClient.productScoreUpdate(product, score)
+          await scoreRestClient.productScoreUpdate(product, score, vtexIdToken)
 
         const productMiddlewareResponse: BodyResponse = {
           id: scoreGraphQLClientResponse.Id,

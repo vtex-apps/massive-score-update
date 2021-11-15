@@ -9,6 +9,14 @@ export async function validateMiddleware(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   next: () => Promise<any>
 ) {
+  const vtexIdToken = ctx.get('VtexIdclientAutCookie')
+
+  if (!vtexIdToken) {
+    ctx.status = 401
+
+    return
+  }
+
   const responseManager: ResponseManager = {
     updateResponse: [],
     responseProduct: [],

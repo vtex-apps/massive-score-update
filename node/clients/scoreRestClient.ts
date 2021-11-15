@@ -12,8 +12,7 @@ export default class ScoreRestClient extends JanusClient {
     super(context, {
       ...options,
       headers: {
-        VtexIdClientAutCookie:
-          context.adminUserAuthToken ?? context.authToken ?? '',
+        VtexIdClientAutCookie: context.authToken ?? '',
         'Content-Type': 'application/json; charset=utf-8',
         Accept: 'application/json',
       },
@@ -22,7 +21,8 @@ export default class ScoreRestClient extends JanusClient {
 
   public async productScoreUpdate(
     body: ResponseProduct,
-    score: number | string
+    score: number | string,
+    authToken: string
   ): Promise<ScoreUpdateResponse> {
     return this.http.put(
       `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${body.Id}`,
@@ -47,13 +47,19 @@ export default class ScoreRestClient extends JanusClient {
         AdWordsRemarketingCode: body.AdWordsRemarketingCode,
         LomadeeCampaignCode: body.LomadeeCampaignCode,
         Score: score,
+      },
+      {
+        headers: {
+          VtexIdclientAutCookie: authToken,
+        },
       }
     )
   }
 
   public async catalogScoreUpdate(
     body: ResponseCategory,
-    score: number | string
+    score: number | string,
+    authToken: string
   ): Promise<ScoreUpdateResponse> {
     return this.http.put(
       `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${body.Id}`,
@@ -74,23 +80,40 @@ export default class ScoreRestClient extends JanusClient {
         Score: score,
         LinkId: body.LinkId,
         HasChildren: body.HasChildren,
+      },
+      {
+        headers: {
+          VtexIdclientAutCookie: authToken,
+        },
       }
     )
   }
 
   public async getCategory(
-    catalogId: number | string
+    catalogId: number | string,
+    authToken: string
   ): Promise<ResponseCategory> {
     return this.http.get(
-      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${catalogId}`
+      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${catalogId}`,
+      {
+        headers: {
+          VtexIdclientAutCookie: authToken,
+        },
+      }
     )
   }
 
   public async getProduct(
-    productId: number | string
+    productId: number | string,
+    authToken: string
   ): Promise<ResponseProduct> {
     return this.http.get(
-      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${productId}`
+      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${productId}`,
+      {
+        headers: {
+          VtexIdclientAutCookie: authToken,
+        },
+      }
     )
   }
 }
