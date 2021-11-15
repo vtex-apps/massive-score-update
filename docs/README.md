@@ -2,15 +2,35 @@
 
 Massive product and catalog score update service
 
-##### `PUT `
+---
 
-`https://app.io.vtex.com/vtexarg.massive-score-update/v2/{{accountName}}/{{workspace}}/_v/massive/product/score/update`
+```shell
+PUT https://{{workspace}}/{{accountName}}/_v/massive/product/score/update
+```
+
+## Curl
+
+```shell
+curl --location --request PUT 'https://{{workspace}}/{{accountName}}/_v/massive/product/score/update' \
+--header 'VtexIdClientAutCookie: "" \
+--header 'Content-Type: application/json' \
+--data-raw '[
+    {
+        "id": 1,
+        "score": 1
+    }
+
+]'
+```
+
+## Specification
 
 ### Headers
 
 - Required
   - Accept : application/json
   - Content-Type : application/json; charset=utf-8
+  - VtexIdclientAutCookie : `eyJhbGciOi...`
 
 ### Path params
 
@@ -75,15 +95,33 @@ Massive product and catalog score update service
 
 ---
 
-##### `PUT `
+```shell
+PUT https://{{workspace}}/{{accountName}}/_v/massive/catalog/score/update
+```
 
-`https://app.io.vtex.com/vtexarg.massive-score-update/v2/{{accountName}}/{{workspace}}/_v/massive/catalog/score/update`
+## Curl
+
+```shell
+curl --location --request PUT 'https://{{workspace}}/{{accountName}}/_v/massive/catalog/score/update' \
+--header 'VtexIdClientAutCookie: "" \
+--header 'Content-Type: application/json' \
+--data-raw '[
+    {
+        "id": 1,
+        "score": 1
+    }
+
+]'
+```
+
+## Specification
 
 ### Headers
 
 - Required
   - Accept : application/json
   - Content-Type : application/json; charset=utf-8
+  - VtexIdclientAutCookie : `eyJhbGciOi...`
 
 ### Path params
 
@@ -146,10 +184,45 @@ Massive product and catalog score update service
 }
 ```
 
+## Credentials
+
+### Create appKey y appToken
+
+To generate app keys in your account, you should follow the instructions seen in the [Application Keys](https://help.vtex.com/en/tutorial/application-keys--2iffYzlvvz4BDMr6WGUtet) article in our Help Center.
+
+### Convert to JWT
+
+Make a call with the credentials created. The result, if the credentials are valid, will return a token that will be used as the value in the header 'VtexIdclientAutCookie' requested by the massive-stock-update component.
+
+```shell
+curl --location --request POST 'http://vtexid.vtexcommercestable.com.br/api/vtexid/apptoken/login' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "appkey": "...",
+    "apptoken": "..."
+}'
+```
+
 ## Flow
 
 ![Massive score update flow](https://user-images.githubusercontent.com/33711188/132861772-a09ddf58-c326-4d43-bd57-0f4c5157e681.png)
 
-## Contributors ✨
+## Contributors
 
-Thanks goes to these wonderful people:
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/GuidoSdo"><img src="https://avatars.githubusercontent.com/u/33711188?v=4" width="100px;" alt=""/><br /><sub><b>Guido Salcedo</b></sub></a><br /><a href="https://github.com/vtex-apps/massive-stock-update" title="Code">💻</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
