@@ -42,6 +42,12 @@
     },
     {
       "name": "colossus-write-logs"
+    },
+    {
+      "name": "ManterFormularioProdutoSku"
+    },
+    {
+      "name": "ProdutoForm.aspx"
     }
   ],
   "settingsSchema": {
