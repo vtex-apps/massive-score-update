@@ -1,17 +1,17 @@
 # MASSIVE SCORE UPDATE
 
-Massive product and catalog score update service
+This application that exposes two endpoints of massive update of product scores and catalogs.
 
 ---
 
 ```shell
-PUT https://{{workspace}}/{{accountName}}/_v/massive/product/score/update
+PUT https://{{workspace}}--{{accountName}}/_v/massive/product/score/update
 ```
 
 ## Curl
 
 ```shell
-curl --location --request PUT 'https://{{workspace}}/{{accountName}}/_v/massive/product/score/update' \
+curl --location --request PUT 'https://{{workspace}}--{{accountName}}/_v/massive/product/score/update' \
 --header 'VtexIdClientAutCookie: "" \
 --header 'Content-Type: application/json' \
 --data-raw '[
@@ -96,13 +96,13 @@ curl --location --request PUT 'https://{{workspace}}/{{accountName}}/_v/massive/
 ---
 
 ```shell
-PUT https://{{workspace}}/{{accountName}}/_v/massive/catalog/score/update
+PUT https://{{workspace}}--{{accountName}}/_v/massive/catalog/score/update
 ```
 
 ## Curl
 
 ```shell
-curl --location --request PUT 'https://{{workspace}}/{{accountName}}/_v/massive/catalog/score/update' \
+curl --location --request PUT 'https://{{workspace}}--{{accountName}}/_v/massive/catalog/score/update' \
 --header 'VtexIdClientAutCookie: "" \
 --header 'Content-Type: application/json' \
 --data-raw '[
@@ -184,15 +184,24 @@ curl --location --request PUT 'https://{{workspace}}/{{accountName}}/_v/massive/
 }
 ```
 
+---
+
 ## Credentials
 
 ### Create appKey y appToken
 
 To generate app keys in your account, you should follow the instructions seen in the [Application Keys](https://help.vtex.com/en/tutorial/application-keys--2iffYzlvvz4BDMr6WGUtet) article in our Help Center.
 
+### Create role
+
+[Create a role](https://help.vtex.com/en/tutorial/perfiles-de-acceso--7HKK5Uau2H6wxE1rH5oRbc) with the following resources and add your user to that role
+
+- Catalog / Content / Product management
+- Catalog / Content / Product and SKU Management
+
 ### Convert to JWT
 
-Make a call with the credentials created. The result, if the credentials are valid, will return a token that will be used as the value in the header 'VtexIdclientAutCookie' requested by the massive-stock-update component.
+Make a call with the credentials created. The result, if the credentials are valid, will return a token that will be used as the value in the header 'VtexIdclientAutCookie' requested by the component.
 
 ```shell
 curl --location --request POST 'http://vtexid.vtexcommercestable.com.br/api/vtexid/apptoken/login' \
@@ -203,9 +212,13 @@ curl --location --request POST 'http://vtexid.vtexcommercestable.com.br/api/vtex
 }'
 ```
 
+---
+
 ## Flow
 
 ![Massive score update flow](https://user-images.githubusercontent.com/33711188/132861772-a09ddf58-c326-4d43-bd57-0f4c5157e681.png)
+
+---
 
 ## Contributors
 
