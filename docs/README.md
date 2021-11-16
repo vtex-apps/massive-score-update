@@ -5,13 +5,13 @@ This application that exposes two endpoints of massive update of product scores 
 ---
 
 ```shell
-PUT https://{{workspace}}--{{accountName}}/_v/massive/product/score/update
+PUT https://{{workspace}}--{{accountName}}.myvtex.com/_v/massive/product/score/update
 ```
 
 ## Curl
 
 ```shell
-curl --location --request PUT 'https://{{workspace}}--{{accountName}}/_v/massive/product/score/update' \
+curl --location --request PUT 'https://{{workspace}}--{{accountName}}.myvtex.com/_v/massive/product/score/update' \
 --header 'VtexIdClientAutCookie: "" \
 --header 'Content-Type: application/json' \
 --data-raw '[
@@ -96,13 +96,13 @@ curl --location --request PUT 'https://{{workspace}}--{{accountName}}/_v/massive
 ---
 
 ```shell
-PUT https://{{workspace}}--{{accountName}}/_v/massive/catalog/score/update
+PUT https://{{workspace}}--{{accountName}}.myvtex.com/_v/massive/catalog/score/update
 ```
 
 ## Curl
 
 ```shell
-curl --location --request PUT 'https://{{workspace}}--{{accountName}}/_v/massive/catalog/score/update' \
+curl --location --request PUT 'https://{{workspace}}--{{accountName}}.myvtex.com/_v/massive/catalog/score/update' \
 --header 'VtexIdClientAutCookie: "" \
 --header 'Content-Type: application/json' \
 --data-raw '[
