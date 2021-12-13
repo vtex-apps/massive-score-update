@@ -19,13 +19,32 @@ export default class ScoreRestClient extends JanusClient {
     })
   }
 
+  // eslint-disable-next-line max-params
   public async productScoreUpdate(
     body: ResponseProduct,
     score: number | string,
-    authToken: string
+    authToken: string,
+    appKey: string,
+    appToken: string
   ): Promise<ScoreUpdateResponse> {
+    const url = `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${body.Id}`
+
+    const headers =
+      authToken !== ''
+        ? {
+            headers: {
+              VtexIdclientAutCookie: authToken,
+            },
+          }
+        : {
+            headers: {
+              'X-VTEX-API-AppKey': appKey,
+              'X-VTEX-API-AppToken': appToken,
+            },
+          }
+
     return this.http.put(
-      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${body.Id}`,
+      url,
       {
         Name: body.Name,
         DepartmentId: body.DepartmentId,
@@ -48,21 +67,36 @@ export default class ScoreRestClient extends JanusClient {
         LomadeeCampaignCode: body.LomadeeCampaignCode,
         Score: score,
       },
-      {
-        headers: {
-          VtexIdclientAutCookie: authToken,
-        },
-      }
+      headers
     )
   }
 
+  // eslint-disable-next-line max-params
   public async catalogScoreUpdate(
     body: ResponseCategory,
     score: number | string,
-    authToken: string
+    authToken: string,
+    appKey: string,
+    appToken: string
   ): Promise<ScoreUpdateResponse> {
+    const url = `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${body.Id}`
+
+    const headers =
+      authToken !== ''
+        ? {
+            headers: {
+              VtexIdclientAutCookie: authToken,
+            },
+          }
+        : {
+            headers: {
+              'X-VTEX-API-AppKey': appKey,
+              'X-VTEX-API-AppToken': appToken,
+            },
+          }
+
     return this.http.put(
-      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${body.Id}`,
+      url,
       {
         Name: body.Name,
         FatherCategoryId: body.FatherCategoryId,
@@ -81,39 +115,59 @@ export default class ScoreRestClient extends JanusClient {
         LinkId: body.LinkId,
         HasChildren: body.HasChildren,
       },
-      {
-        headers: {
-          VtexIdclientAutCookie: authToken,
-        },
-      }
+      headers
     )
   }
 
+  // eslint-disable-next-line max-params
   public async getCategory(
     catalogId: number | string,
-    authToken: string
+    authToken: string,
+    appKey: string,
+    appToken: string
   ): Promise<ResponseCategory> {
-    return this.http.get(
-      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${catalogId}`,
-      {
-        headers: {
-          VtexIdclientAutCookie: authToken,
-        },
-      }
-    )
+    const url = `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/category/${catalogId}`
+
+    const headers =
+      authToken !== ''
+        ? {
+            headers: {
+              VtexIdclientAutCookie: authToken,
+            },
+          }
+        : {
+            headers: {
+              'X-VTEX-API-AppKey': appKey,
+              'X-VTEX-API-AppToken': appToken,
+            },
+          }
+
+    return this.http.get(url, headers)
   }
 
+  // eslint-disable-next-line max-params
   public async getProduct(
     productId: number | string,
-    authToken: string
+    authToken: string,
+    appKey: string,
+    appToken: string
   ): Promise<ResponseProduct> {
-    return this.http.get(
-      `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${productId}`,
-      {
-        headers: {
-          VtexIdclientAutCookie: authToken,
-        },
-      }
-    )
+    const url = `http://${this.context.account}.vtexcommercestable.com.br/api/catalog/pvt/product/${productId}`
+
+    const headers =
+      authToken !== ''
+        ? {
+            headers: {
+              VtexIdclientAutCookie: authToken,
+            },
+          }
+        : {
+            headers: {
+              'X-VTEX-API-AppKey': appKey,
+              'X-VTEX-API-AppToken': appToken,
+            },
+          }
+
+    return this.http.get(url, headers)
   }
 }

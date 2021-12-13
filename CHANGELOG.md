@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+<<<<<<< HEAD
+
+### Added
+
+- Update README.md
+- Add auth options
+- Add script test
+
 ## [3.0.1] - 2021-11-16
 
 ### Changed
