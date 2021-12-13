@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add auth options
 - Add script test
 
+## [3.0.1] - 2021-11-16
+
+### Changed
+
+- Update README.md
+
 ## [3.0.0] - 2021-11-15
 
 ### Changed
