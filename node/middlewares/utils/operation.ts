@@ -19,11 +19,15 @@ export const operation = async (
     } = ctx
 
     const vtexIdToken = ctx.get('VtexIdclientAutCookie') ?? ''
+    const appKey = ctx.get('X-VTEX-API-AppKey') ?? ''
+    const appToken = ctx.get('X-VTEX-API-AppToken') ?? ''
 
     if (task === 'getProduct') {
       const product: ResponseProduct = await scoreRestClient.getProduct(
         id,
-        vtexIdToken
+        vtexIdToken,
+        appKey,
+        appToken
       )
 
       responseManager.responseProduct.push(product)
@@ -32,7 +36,9 @@ export const operation = async (
     if (task === 'getCategory') {
       const catalog: ResponseCategory = await scoreRestClient.getCategory(
         id,
-        vtexIdToken
+        vtexIdToken,
+        appKey,
+        appToken
       )
 
       responseManager.responseCategory.push(catalog)
@@ -45,7 +51,13 @@ export const operation = async (
 
       if (catalog) {
         const scoreGraphQLClientResponse =
-          await scoreRestClient.catalogScoreUpdate(catalog, score, vtexIdToken)
+          await scoreRestClient.catalogScoreUpdate(
+            catalog,
+            score,
+            vtexIdToken,
+            appKey,
+            appToken
+          )
 
         const categoryMiddlewareResponse: BodyResponse = {
           id: scoreGraphQLClientResponse.Id,
@@ -66,7 +78,13 @@ export const operation = async (
 
       if (product) {
         const scoreGraphQLClientResponse =
-          await scoreRestClient.productScoreUpdate(product, score, vtexIdToken)
+          await scoreRestClient.productScoreUpdate(
+            product,
+            score,
+            vtexIdToken,
+            appKey,
+            appToken
+          )
 
         const productMiddlewareResponse: BodyResponse = {
           id: scoreGraphQLClientResponse.Id,
